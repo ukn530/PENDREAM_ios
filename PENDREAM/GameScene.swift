@@ -13,8 +13,13 @@ class GameScene: SKScene {
     
     // MARK: Property
     
+    // propety of penguin
     let 🐧 = SKSpriteNode()
     var radian: Double = 0
+    
+    // property of substacle
+    let 🐱s = [SKSpriteNode(), SKSpriteNode(), SKSpriteNode(), SKSpriteNode()]
+    let substacleNameArray = ["st_pen_l", "st_pen_r", "st_erasor_l", "st_erasor_r","st_scale_l", "st_scale_r", "st_scessor_l", "st_scessor_r"]
     
     // the framerate of stop motion animetion is 12 frames in a second
     let animationRate = 10
@@ -32,6 +37,27 @@ class GameScene: SKScene {
         🐧.position = CGPoint(x:CGRectGetMidX(self.frame), y:CGRectGetMidY(self.frame) * 3 / 2)
         🐧.zRotation = 0
         self.addChild(🐧)
+        
+        for 🐱 in 🐱s {
+            🐱.position = CGPoint(x:0, y:CGRectGetMaxY(self.frame))
+            let tex = SKTexture(imageNamed: substacleNameArray[0])
+            🐱.texture = tex
+            🐱.size = tex.size()
+            🐱.anchorPoint = CGPoint(x:0, y:0)
+            self.addChild(🐱)
+        }
+        
+        println("🐱s[0]x = \(🐱s[0].position.x)")
+        println("🐱s[0]width = \(🐱s[0].size.width)")
+        println("🐱s[0]height = \(🐱s[0].size.height)")
+        println("🐱s[0]anchorX = \(🐱s[0].anchorPoint.x)")
+        
+        println("CGRectGetMidX = \(CGRectGetMidX(self.frame))")
+        println("CGRectGetMidY = \(CGRectGetMidY(self.frame))")
+        println("CGRectGetMaxX = \(CGRectGetMaxX(self.frame))")
+        println("CGRectGetMaxY = \(CGRectGetMaxY(self.frame))")
+        println("CGRectGetWidth = \(CGRectGetWidth(self.frame))")
+        println("CGRectGetHeight = \(CGRectGetHeight(self.frame))")
     }
     
     
@@ -39,6 +65,39 @@ class GameScene: SKScene {
     
     override func update(currentTime: CFTimeInterval) {
         
+        for i in 0...🐱s.count-1 {
+            🐱s[i].position.y -= CGRectGetHeight(self.frame) * 0.01
+            
+            if 🐱s[i].position.y < -🐱s[i].size.height {
+                var rand = Int(arc4random_uniform(UInt32(8)))
+                var tex = SKTexture(imageNamed: substacleNameArray[rand])
+                🐱s[i].texture = tex
+                🐱s[i].size = tex.size()
+                
+                if i != 0 {
+                    if rand % 2 == 0 {
+                        🐱s[i].position = CGPoint(x:0, y:🐱s[i-1].position.y + 🐱s[i-1].size.height + 🐧.size.height * 1.2)
+                        🐱s[i].anchorPoint = CGPoint(x:0, y:0)
+                    } else {
+                        🐱s[i].position = CGPoint(x:CGRectGetMaxX(self.frame), y:🐱s[i-1].position.y + 🐱s[i-1].size.height + 🐧.size.height * 1.2)
+                        🐱s[i].anchorPoint = CGPoint(x:1.0, y:0)
+                    }
+                } else {
+                    if rand & 2 == 0 {
+                        🐱s[i].position = CGPoint(x:0, y:🐱s[i+🐱s.count-1].position.y + 🐱s[i+🐱s.count-1].size.height + 🐧.size.height * 1.2)
+                        🐱s[i].anchorPoint = CGPoint(x:0, y:0)
+                    } else {
+                        🐱s[i].position = CGPoint(x:CGRectGetMaxX(self.frame), y:🐱s[i+🐱s.count-1].position.y + 🐱s[i+🐱s.count-1].size.height + 🐧.size.height * 1.2)
+                        🐱s[i].anchorPoint = CGPoint(x:1.0, y:0)
+                    }
+                    
+                }
+                
+            }
+        }
+        
+        
+
         //animation of Penguin including stopmotion and swing
         animatePenguin()
     }
@@ -51,7 +110,6 @@ class GameScene: SKScene {
         // swing 🐧
         🐧.zRotation = CGFloat(sin(radian) * M_PI / 20)
         🐧.position = CGPoint(x:CGRectGetMidX(self.frame) + CGFloat(sin(radian)) * CGRectGetMidX(self.frame)/3, y:🐧.position.y)
-        println(CGFloat(sin(radian)))
         
         if isOpenUmbrella {
             radian += M_PI / 60
