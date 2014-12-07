@@ -9,19 +9,21 @@
 import SpriteKit
 
 
-class GameScene: SKScene {
+class GameScene: SKScene, SKPhysicsContactDelegate {
     
     // MARK: Property
     
     // propety of penguin
     let 🐧 = SKSpriteNode()
     var radian: Double = 0
+    var overCounter = CGFloat(0)
     
     // property of Obstacle
     let 🐱s = [SKSpriteNode(), SKSpriteNode(), SKSpriteNode(), SKSpriteNode()]
-    let obstacleNameArray = ["st_pen_l", "st_pen_r", "st_erasor_l", "st_erasor_r","st_scale_l", "st_scale_r", "st_scessor_l", "st_scessor_r"]
+    let obstacleNameArray = ["st_pen_l", "st_pen_r", "st_erasor_l", "st_erasor_r","st_scale_l", "st_scale_r", "st_scessor_l", "st_scessor_r", "fd_banana_l", "fd_banana_r", "fd_bread_l", "fd_bread_r", "fd_chocolate_l", "fd_chocolate_r", "fd_pasta_l", "fd_pasta_r", "an_ant_l", "an_ant_r", "an_cat_l", "an_cat_r", "an_cow_l", "an_cow_r", "an_whale_l", "an_whale_r", "sa_daibutsu_l", "sa_daibutsu_r", "sa_moai_l", "sa_moai_r", "sa_sphinx_l", "sa_sphinx_r", "sa_venus_l", "sa_venus_r", "tw_eiffel_l", "tw_eiffel_r", "tw_empire_l", "tw_empire_r", "tw_sagrada_l", "tw_sagrada_r", "tw_touhoh_l", "tw_touhoh_r"]
     var previousObstacleY = CGFloat(0)
     let speedObstacle = CGFloat(4)
+    var acceration = CGFloat(1)
     
     // the framerate of stop motion animetion is 12 frames in a second
     let animationRate = 10
@@ -29,6 +31,37 @@ class GameScene: SKScene {
     var animeState = 0
     
     var isOpenUmbrella = true
+    
+    // category for collision test
+    let penguinCategory: UInt32 = 0x1 << 0
+    let obstacleCategory: UInt32 = 0x1 << 1
+    
+    // property of Score
+    let counterSmallSpriteArray = [SKSpriteNode(), SKSpriteNode(), SKSpriteNode(), SKSpriteNode()]
+    var isCountable = true
+    var score = 0
+    var bestScore = 0
+    
+    let scoreSpriteArray = [SKSpriteNode(), SKSpriteNode(), SKSpriteNode(), SKSpriteNode()]
+    let bestSpriteArray = [SKSpriteNode(), SKSpriteNode(), SKSpriteNode(), SKSpriteNode()]
+    
+    // gameover
+    var goY = CGFloat(0)
+    let gameoverTitle = SKSpriteNode()
+    let board = SKSpriteNode()
+    let scoreText = SKSpriteNode(imageNamed: "score")
+    let bestText = SKSpriteNode(imageNamed: "best")
+    let twButton = SKSpriteNode(imageNamed: "button_twitter")
+    let fbButton = SKSpriteNode(imageNamed: "button_facebook")
+    let startButton = SKSpriteNode()
+    let rankingButton = SKSpriteNode()
+    let backButton = SKSpriteNode(imageNamed: "button_back")
+    let noadButton = SKSpriteNode(imageNamed: "button_noads")
+    
+    // gameState
+    let GAME_PLAY = 0
+    let GAME_OVER = 1
+    var gameState = 0
     
     
     // MARK: Setup
@@ -39,6 +72,9 @@ class GameScene: SKScene {
         let background = SKSpriteNode(imageNamed: "background")
         background.anchorPoint = CGPoint(x: 0, y: 0)
         self.addChild(background)
+       
+        // setup collision
+        self.physicsWorld.contactDelegate = self
         
         // setup 🐧
         resetPenguin()
@@ -50,6 +86,22 @@ class GameScene: SKScene {
             previousObstacleY = 🐱.position.y
             self.addChild(🐱)
         }
+        
+        // setup counter
+        var x = 0
+        for num in counterSmallSpriteArray {
+            let tex = SKTexture(imageNamed: "num0s")
+            num.position = CGPoint(x: 10 + tex.size().width * CGFloat(x), y: CGRectGetMaxY(self.frame) - 10)
+            num.size = tex.size()
+            num.anchorPoint = CGPoint(x:0, y:1)
+            self.addChild(num)
+            x++
+        }
+        resetScore(spriteArray: counterSmallSpriteArray, left: true, score: 0)
+        
+        // setup gameover
+        goY = -CGRectGetMaxY(self.frame)
+        setupGameover()
     }
     
     
@@ -57,11 +109,18 @@ class GameScene: SKScene {
     
     override func update(currentTime: CFTimeInterval) {
         
-        // animation of Penguin including stopmotion and swing
-        animatePenguin()
-        
-        // animation of Obstacle
-        animateObstacle()
+        if gameState == GAME_PLAY {
+            
+            // animation of Penguin including stopmotion and swing
+            animatePenguin()
+            
+            // animation of Obstacle
+            animateObstacle()
+        } else if gameState == GAME_OVER {
+            
+            
+            animateOver()
+        }
     }
     
     
@@ -80,12 +139,12 @@ class GameScene: SKScene {
             radian = 0
         }
         
-        // alternate Texture of 🐧 for stop motion Animation
-        if isOpenUmbrella {
-            alternateSpriteTexture(Sprite: 🐧, ImageName1: "penguin_open1", ImageName2: "penguin_open2")
-        } else {
-            alternateSpriteTexture(Sprite: 🐧, ImageName1: "penguin_close1", ImageName2: "penguin_close2")
-        }
+        🐧.physicsBody = SKPhysicsBody(rectangleOfSize: 🐧.size)
+        🐧.physicsBody?.affectedByGravity = false
+        🐧.physicsBody?.dynamic = false
+        🐧.physicsBody?.categoryBitMask = penguinCategory
+        🐧.physicsBody?.contactTestBitMask = obstacleCategory
+
     }
     
     
@@ -97,10 +156,14 @@ class GameScene: SKScene {
             
             // move to bottom from top
             if isOpenUmbrella {
-                🐱s[i].position.y += speedObstacle
+                acceration = 1
             } else {
-                🐱s[i].position.y += speedObstacle * 2
+                if acceration < 4 {
+                    acceration *= 1.03
+                }
             }
+            
+            🐱s[i].position.y += speedObstacle * acceration
             
             // when gone from view
             if 🐱s[i].position.y > CGRectGetHeight(self.frame) {
@@ -111,10 +174,52 @@ class GameScene: SKScene {
                     previousObstacleY = 🐱s[i+🐱s.count-1].position.y
                 }
                 resetObstacle(Sprite: 🐱s[i])
+                
+                isCountable = true
+            }
+            
+            if 🐱s[i].position.y > 🐧.position.y + 🐧.size.height / 2 && isCountable {
+                score += 1
+                isCountable = false
+                resetScore(spriteArray: counterSmallSpriteArray, left: true, score: score)
+                println("score = \(score)")
             }
         }
     }
     
+    
+    func animateOver() {
+        if 🐧.position.y > -🐧.size.height {
+            🐧.zRotation = 🐧.zRotation + CGFloat(M_PI/30)
+            🐧.position.y += 10 - 9.8 * overCounter / 20;
+            overCounter++
+        } else {
+            if goY < -0.001 {
+                
+                gameoverTitle.position.y = CGRectGetMidY(self.frame) * 5 / 3 + goY
+                board.position.y = CGRectGetMidY(self.frame)*1.2 + goY
+                scoreText.position.y = board.position.y + board.size.height/16
+                bestText.position.y = board.position.y - board.size.height/3
+                
+                for num in scoreSpriteArray {
+                    num.position.y = scoreText.position.y
+                }
+            
+                for num in bestSpriteArray {
+                    num.position.y = bestText.position.y
+                }
+                
+                twButton.position.y = board.position.y - board.size.height * 8/11
+                fbButton.position.y = board.position.y - board.size.height * 8/11
+                startButton.position.y = board.position.y - board.size.height * 11/10
+                rankingButton.position.y = board.position.y - board.size.height * 3/2
+                backButton.position.y = 0 + goY
+                noadButton.position.y = 0 + goY
+                
+                goY /= 1.2
+            }
+        }
+    }
     
     
     // MARK: setting
@@ -122,10 +227,8 @@ class GameScene: SKScene {
     // reset 🐧's texture and position
     func resetPenguin() {
         
+        alternateTexture(Sprite: 🐧, ImageName1: "penguin_open1", ImageName2: "penguin_open2")
         🐧.position = CGPoint(x:CGRectGetMidX(self.frame), y:CGRectGetMidY(self.frame) * 3 / 2)
-        let tex = SKTexture(imageNamed: "penguin_open1")
-        🐧.texture = tex
-        🐧.size = tex.size()
         🐧.zRotation = 0
     }
     
@@ -133,10 +236,15 @@ class GameScene: SKScene {
     
     func resetObstacle(Sprite 🐱: SKSpriteNode) {
         
-        var rand = Int(arc4random_uniform(UInt32(8)))
+        var rand = Int(arc4random_uniform(UInt32(40)))
         var tex = SKTexture(imageNamed: obstacleNameArray[rand])
         🐱.texture = tex
         🐱.size = tex.size()
+        🐱.zRotation = 0
+        🐱.physicsBody = SKPhysicsBody(rectangleOfSize: 🐱.size)
+        🐱.physicsBody?.affectedByGravity = false
+        🐱.physicsBody?.categoryBitMask = obstacleCategory
+        🐱.physicsBody?.contactTestBitMask = penguinCategory
         
         if rand%2 == 0 {
             🐱.position = CGPoint(x:0, y:previousObstacleY - 🐱.size.height - 🐧.size.height)
@@ -145,56 +253,181 @@ class GameScene: SKScene {
             🐱.position = CGPoint(x:CGRectGetMaxX(self.frame), y:previousObstacleY - 🐱.size.height - 🐧.size.height)
             🐱.anchorPoint = CGPoint(x:1.0, y:0)
         }
+    }
+    
+    func resetScore(spriteArray sArray: [SKSpriteNode], left isLeft: Bool, score sc: Int) {
         
+        if sc < 10 {
+            if isLeft {
+                sArray[0].texture = SKTexture(imageNamed: "num\(sc)s")
+            } else {
+                sArray[3].texture = SKTexture(imageNamed: "num\(sc)s")
+            }
+        } else if sc < 100 {
+            var p1 = Int(sc/10)
+            var p10 = sc - p1 * 10
+            
+            if isLeft {
+                sArray[0].texture = SKTexture(imageNamed: "num\(p1)s")
+                sArray[1].texture = SKTexture(imageNamed: "num\(p10)s")
+            } else {
+                sArray[2].texture = SKTexture(imageNamed: "num\(p1)s")
+                sArray[3].texture = SKTexture(imageNamed: "num\(p10)s")
+            }
+        } else if sc < 1000 {
+            var p1 = Int(sc/100)
+            var p10 = Int((sc - p1 * 100)/10)
+            var p100 = sc - p1 * 100 - p10 * 10
+            
+            if isLeft {
+                sArray[0].texture = SKTexture(imageNamed: "num\(p1)s")
+                sArray[1].texture = SKTexture(imageNamed: "num\(p10)s")
+                sArray[2].texture = SKTexture(imageNamed: "num\(p100)s")
+            } else {
+                sArray[1].texture = SKTexture(imageNamed: "num\(p1)s")
+                sArray[2].texture = SKTexture(imageNamed: "num\(p10)s")
+                sArray[3].texture = SKTexture(imageNamed: "num\(p100)s")
+            }
+            
+        } else if sc < 10000 {
+            var p1 = Int(sc/1000)
+            var p10 = Int((sc - p1 * 1000)/100)
+            var p100 = Int((sc - p1 * 1000 - p10 * 100)/10)
+            var p1000 = sc - p1 * 1000 - p10 * 100 - p100 * 10
+            sArray[0].texture = SKTexture(imageNamed: "num\(p1)s")
+            sArray[1].texture = SKTexture(imageNamed: "num\(p10)s")
+            sArray[2].texture = SKTexture(imageNamed: "num\(p100)s")
+            sArray[3].texture = SKTexture(imageNamed: "num\(p1000)s")
+        }
     }
     
     
+    func setupGameover() {
+        
+        // Title of GAMEOVER
+        alternateTexture(Sprite: gameoverTitle, ImageName1: "gameover1", ImageName2: "gameover2")
+        gameoverTitle.position = CGPoint(x: CGRectGetMidX(self.frame), y: CGRectGetMidY(self.frame) * 5 / 3 + goY)
+        self.addChild(gameoverTitle)
+        
+        // Board of Score
+        alternateTexture(Sprite: board, ImageName1: "board1", ImageName2: "board2")
+        board.position = CGPoint(x: CGRectGetMidX(self.frame), y: CGRectGetMidY(self.frame)*1.2 + goY)
+        board.zPosition = 1
+        self.addChild(board)
+        
+        // Score on Board
+        scoreText.anchorPoint = CGPoint(x: 0, y: 0)
+        scoreText.position = CGPoint(x: board.position.x / 3, y: board.position.y + board.size.height/16)
+        scoreText.zPosition = 2
+        self.addChild(scoreText)
+        
+        bestText.anchorPoint = CGPoint(x: 0, y: 0)
+        bestText.position = CGPoint(x: board.position.x / 3, y: board.position.y - board.size.height/3)
+        bestText.zPosition = 2
+        self.addChild(bestText)
+        
+        var i = 0
+        for num in scoreSpriteArray {
+            let tex = SKTexture(imageNamed: "num0")
+            num.position = CGPoint(x: board.position.x + tex.size().width * CGFloat(i), y: scoreText.position.y)
+            num.size = tex.size()
+            num.anchorPoint = CGPoint(x:0, y:0)
+            num.zPosition = 2
+            self.addChild(num)
+            i++
+        }
+        
+        var j = 0
+        for num in bestSpriteArray {
+            let tex = SKTexture(imageNamed: "num0")
+            num.position = CGPoint(x: board.position.x + tex.size().width * CGFloat(j), y: bestText.position.y)
+            num.size = tex.size()
+            num.anchorPoint = CGPoint(x:0, y:0)
+            num.zPosition = 2
+            self.addChild(num)
+            j++
+        }
+        
+        // Twitter Button
+        twButton.position = CGPoint(x: board.position.x * 3 / 4, y: board.position.y - board.size.height * 8/11)
+        twButton.zPosition = 2
+        self.addChild(twButton)
+        
+        // Facebook Button
+        fbButton.position = CGPoint(x: board.position.x * 5 / 4, y: board.position.y - board.size.height * 8/11)
+        fbButton.zPosition = 2
+        self.addChild(fbButton)
+        
+        // Start Button
+        alternateTexture(Sprite: startButton, ImageName1: "button_start1", ImageName2: "button_start2")
+        startButton.position = CGPoint(x: board.position.x, y: board.position.y - board.size.height * 11/10)
+        startButton.zPosition = 2
+        self.addChild(startButton)
+        
+        // Ranking Button
+        alternateTexture(Sprite: rankingButton, ImageName1: "button_ranking1", ImageName2: "button_ranking2")
+        rankingButton.position = CGPoint(x: board.position.x, y: board.position.y - board.size.height * 15/10)
+        rankingButton.zPosition = 2
+        self.addChild(rankingButton)
+        
+        // Back Button
+        backButton.anchorPoint = CGPoint(x: 0, y: 0)
+        backButton.position = CGPoint(x: 0, y: 0 + goY)
+        backButton.zPosition = 2
+        self.addChild(backButton)
+        
+        // NoAd Button
+        noadButton.anchorPoint = CGPoint(x: 1, y: 0)
+        noadButton.position = CGPoint(x:CGRectGetMaxX(self.frame), y: 0 + goY)
+        noadButton.zPosition = 2
+        self.addChild(noadButton)
+    }
     
-    // MARK: Touch Event
+    
+    // MARK: Event
     
     override func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
+        
+        alternateTexture(Sprite: 🐧, ImageName1: "penguin_close1", ImageName2: "penguin_close2")
         
         isOpenUmbrella = false
     }
     
     override func touchesEnded(touches: NSSet, withEvent event: UIEvent) {
         
+        alternateTexture(Sprite: 🐧, ImageName1: "penguin_open1", ImageName2: "penguin_open2")
+        
         isOpenUmbrella = true
     }
+    
+    
+    func didBeginContact(contact: SKPhysicsContact!) {
+        
+        gameState = GAME_OVER
+        
+        for 🐱 in 🐱s {
+            🐱.physicsBody = nil
+        }
+        
+        for num in counterSmallSpriteArray {
+            num.hidden = true
+        }
+        
+        resetScore(spriteArray: scoreSpriteArray, left: false, score: score)
+        resetScore(spriteArray: bestSpriteArray, left: false, score: bestScore)
+    }
+
     
     
     // MARK: StopMotionAnimation
     
     // alternate Texture of a Sprite for stop motion animation
     
-    func alternateSpriteTexture(Sprite sprite: SKSpriteNode, ImageName1 imageName1: String, ImageName2 imageName2: String) {
-        
-        if animeState < 1 {
-            let tex1 = SKTexture(imageNamed: imageName1)
-            sprite.texture = tex1
-            sprite.size = tex1.size()
-        } else {
-            let tex2 = SKTexture(imageNamed: imageName2)
-            sprite.texture = tex2
-            sprite.size = tex2.size()
-        }
-        
-        // alternate animeState by framerate
-        calculateFrameAnimation()
-    }
-    
-    // alternate animeState by framerate
-    
-    func calculateFrameAnimation() {
-        
-        if animeCounter < animationRate / 2 {
-            animeState = 0
-        } else if animeCounter < animationRate {
-            animeState = 1
-        } else {
-            animeCounter = 0
-        }
-        
-        animeCounter++
+    func alternateTexture(Sprite sprite: SKSpriteNode, ImageName1 imageName1: String, ImageName2 imageName2: String) {
+        let tex1 = SKTexture(imageNamed: imageName1)
+        let tex2 = SKTexture(imageNamed: imageName2)
+        let texArray = [tex1, tex2]
+        sprite.size = tex1.size()
+        sprite.runAction(SKAction.repeatActionForever(SKAction.animateWithTextures(texArray, timePerFrame: 0.1)))
     }
 }
