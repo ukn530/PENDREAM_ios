@@ -58,6 +58,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let backButton = SKSpriteNode(imageNamed: "button_back")
     let noadButton = SKSpriteNode(imageNamed: "button_noads")
     
+    var touchButtonName: String? = nil
+    
     // gameState
     let GAME_PLAY = 0
     let GAME_OVER = 1
@@ -116,6 +118,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             
             // animation of Obstacle
             animateObstacle()
+            
+            // remove gameover board
+            animateStart()
         } else if gameState == GAME_OVER {
             
             
@@ -194,7 +199,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             🐧.position.y += 10 - 9.8 * overCounter / 20;
             overCounter++
         } else {
-            if goY < -0.001 {
+            overCounter = 0
+            if goY < -1 {
                 
                 gameoverTitle.position.y = CGRectGetMidY(self.frame) * 5 / 3 + goY
                 board.position.y = CGRectGetMidY(self.frame)*1.2 + goY
@@ -219,6 +225,36 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 goY /= 1.2
             }
         }
+    }
+    
+    func animateStart() {
+        
+        if goY >= -CGRectGetMaxY(self.frame) {
+            println("ss")
+            
+            gameoverTitle.position.y = CGRectGetMidY(self.frame) * 5 / 3 + goY
+            board.position.y = CGRectGetMidY(self.frame)*1.2 + goY
+            scoreText.position.y = board.position.y + board.size.height/16
+            bestText.position.y = board.position.y - board.size.height/3
+            
+            for num in scoreSpriteArray {
+                num.position.y = scoreText.position.y
+            }
+            
+            for num in bestSpriteArray {
+                num.position.y = bestText.position.y
+            }
+            
+            twButton.position.y = board.position.y - board.size.height * 8/11
+            fbButton.position.y = board.position.y - board.size.height * 8/11
+            startButton.position.y = board.position.y - board.size.height * 11/10
+            rankingButton.position.y = board.position.y - board.size.height * 3/2
+            backButton.position.y = 0 + goY
+            noadButton.position.y = 0 + goY
+            
+            goY -= 100
+        }
+
     }
     
     
@@ -351,35 +387,41 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Twitter Button
         twButton.position = CGPoint(x: board.position.x * 3 / 4, y: board.position.y - board.size.height * 8/11)
         twButton.zPosition = 2
+        twButton.name = "twitter_button"
         self.addChild(twButton)
         
         // Facebook Button
         fbButton.position = CGPoint(x: board.position.x * 5 / 4, y: board.position.y - board.size.height * 8/11)
         fbButton.zPosition = 2
+        fbButton.name = "facebook_button"
         self.addChild(fbButton)
         
         // Start Button
         alternateTexture(Sprite: startButton, ImageName1: "button_start1", ImageName2: "button_start2")
         startButton.position = CGPoint(x: board.position.x, y: board.position.y - board.size.height * 11/10)
         startButton.zPosition = 2
+        startButton.name = "start_button"
         self.addChild(startButton)
         
         // Ranking Button
         alternateTexture(Sprite: rankingButton, ImageName1: "button_ranking1", ImageName2: "button_ranking2")
         rankingButton.position = CGPoint(x: board.position.x, y: board.position.y - board.size.height * 15/10)
         rankingButton.zPosition = 2
+        rankingButton.name = "ranking_button"
         self.addChild(rankingButton)
         
         // Back Button
         backButton.anchorPoint = CGPoint(x: 0, y: 0)
         backButton.position = CGPoint(x: 0, y: 0 + goY)
         backButton.zPosition = 2
+        backButton.name = "back_button"
         self.addChild(backButton)
         
         // NoAd Button
         noadButton.anchorPoint = CGPoint(x: 1, y: 0)
         noadButton.position = CGPoint(x:CGRectGetMaxX(self.frame), y: 0 + goY)
         noadButton.zPosition = 2
+        noadButton.name = "noad_button"
         self.addChild(noadButton)
     }
     
@@ -387,15 +429,63 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     // MARK: Event
     
     override func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
-        
-        alternateTexture(Sprite: 🐧, ImageName1: "penguin_close1", ImageName2: "penguin_close2")
+        if gameState == GAME_PLAY {
+            alternateTexture(Sprite: 🐧, ImageName1: "penguin_close1", ImageName2: "penguin_close2")
+        } else if (gameState == GAME_OVER) {
+            
+            for touch: AnyObject in touches {
+                let location = touch.locationInNode(self)
+                touchButtonName = nodeAtPoint(location).name
+                
+                if touchButtonName == "start_button" {
+                    alternateTexture(Sprite: startButton, ImageName1: "button_start_on1", ImageName2: "button_start_on2")
+                } else if (touchButtonName == "ranking_button") {
+                    alternateTexture(Sprite: rankingButton, ImageName1: "button_ranking_on1", ImageName2: "button_ranking_on2")
+                } else if (touchButtonName == "twitter_button") {
+                    twButton.texture = SKTexture(imageNamed: "button_twitter_on")
+                } else if (touchButtonName == "facebook_button") {
+                    fbButton.texture = SKTexture(imageNamed: "button_facebook_on")
+                }
+            }
+        }
         
         isOpenUmbrella = false
     }
     
+    
     override func touchesEnded(touches: NSSet, withEvent event: UIEvent) {
-        
-        alternateTexture(Sprite: 🐧, ImageName1: "penguin_open1", ImageName2: "penguin_open2")
+        if gameState == GAME_PLAY {
+            alternateTexture(Sprite: 🐧, ImageName1: "penguin_open1", ImageName2: "penguin_open2")
+        } else if (gameState == GAME_OVER) {
+            
+            for touch: AnyObject in touches {
+                let location = touch.locationInNode(self)
+                if touchButtonName == nodeAtPoint(location).name {
+                    if touchButtonName == "start_button" {
+                        println(touchButtonName)
+                        resetGame()
+                        
+                    } else if (touchButtonName == "ranking_button") {
+                        println(touchButtonName)
+                    } else if (touchButtonName == "twitter_button") {
+                        println(touchButtonName)
+                    } else if (touchButtonName == "facebook_button") {
+                        println(touchButtonName)
+                    } else if (touchButtonName == "back_button") {
+                        println(touchButtonName)
+                    } else if (touchButtonName == "noad_button") {
+                        println(touchButtonName)
+                    }
+                }
+            }
+            
+            alternateTexture(Sprite: startButton, ImageName1: "button_start1", ImageName2: "button_start2")
+            alternateTexture(Sprite: rankingButton, ImageName1: "button_ranking1", ImageName2: "button_ranking2")
+            twButton.texture = SKTexture(imageNamed: "button_twitter")
+            fbButton.texture = SKTexture(imageNamed: "button_facebook")
+            
+            touchButtonName = nil
+        }
         
         isOpenUmbrella = true
     }
@@ -415,6 +505,27 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         resetScore(spriteArray: scoreSpriteArray, left: false, score: score)
         resetScore(spriteArray: bestSpriteArray, left: false, score: bestScore)
+    }
+    
+    func resetGame() {
+        
+        gameState = GAME_PLAY
+        // setup 🐧
+        resetPenguin()
+        
+        // setup 🐱
+        previousObstacleY = 0
+        for 🐱 in 🐱s {
+            resetObstacle(Sprite: 🐱)
+            previousObstacleY = 🐱.position.y
+        }
+        
+        // reset Score
+        resetScore(spriteArray: counterSmallSpriteArray, left: true, score: 0)
+        
+        
+        // animateStart
+        animateStart()
     }
 
     
