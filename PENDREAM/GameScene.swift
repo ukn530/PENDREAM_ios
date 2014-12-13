@@ -98,6 +98,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             num.position = CGPoint(x: 10 + tex.size().width * CGFloat(x), y: CGRectGetMaxY(self.frame) - 10)
             num.size = tex.size()
             num.anchorPoint = CGPoint(x:0, y:1)
+            num.zPosition = 2
             self.addChild(num)
             x++
         }
@@ -274,8 +275,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func resetObstacle(Sprite 🐱: SKSpriteNode) {
         
-        var rand = Int(arc4random_uniform(UInt32(40)))
+        var rand = 0
+        
+        if score < 10 {
+            rand = Int(arc4random_uniform(UInt32(8)))
+        } else if score < 20 {
+            rand = Int(arc4random_uniform(UInt32(8))) + 8
+        } else if score < 30 {
+            rand = Int(arc4random_uniform(UInt32(8))) + 16
+        } else if score < 40 {
+            rand = Int(arc4random_uniform(UInt32(8))) + 24
+        } else if score < 50 {
+            rand = Int(arc4random_uniform(UInt32(8))) + 32
+        } else {
+            rand = Int(arc4random_uniform(UInt32(40)))
+        }
+        
         var name = obstacleNameArray[rand]
+        
         var tex = SKTexture(imageNamed: name)
         🐱.texture = tex
         🐱.size = tex.size()
@@ -295,6 +312,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func resetScore(spriteArray sArray: [SKSpriteNode], left isLeft: Bool, score sc: Int) {
+        
+        for num in sArray {
+            num.texture = nil
+        }
         
         if sc < 10 {
             if isLeft {
@@ -524,9 +545,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         for 🐱 in 🐱s {
             🐱.physicsBody = nil
         }
+        🐧.physicsBody = nil
+        
         
         for num in counterSmallSpriteArray {
-            num.hidden = true
+            num.texture = nil
         }
         
         resetScore(spriteArray: scoreSpriteArray, left: false, score: score)
@@ -536,6 +559,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func resetGame() {
         
         gameState = GAME_PLAY
+        
+        
+        // reset Score
+        score = 0
+        resetScore(spriteArray: counterSmallSpriteArray, left: true, score: score)
+        resetScore(spriteArray: scoreSpriteArray, left: false, score: score)
+        
+        
         // setup 🐧
         resetPenguin()
         isOpenUmbrella = true
@@ -546,9 +577,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             resetObstacle(Sprite: 🐱)
             previousObstacleY = 🐱.position.y
         }
-        
-        // reset Score
-        resetScore(spriteArray: counterSmallSpriteArray, left: true, score: 0)
         
         // animateStart
         animateStart()
