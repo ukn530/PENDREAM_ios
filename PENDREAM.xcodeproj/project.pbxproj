@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6125EBCC1A389025006CC195 /* StartScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6125EBCB1A389025006CC195 /* StartScene.swift */; };
+		6125EBD01A389073006CC195 /* StartScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 6125EBCF1A389073006CC195 /* StartScene.sks */; };
 		61A7FD711A2F5FDB00F410BA /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61A7FD701A2F5FDB00F410BA /* AppDelegate.swift */; };
 		61A7FD731A2F5FDB00F410BA /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 61A7FD721A2F5FDB00F410BA /* GameScene.sks */; };
 		61A7FD751A2F5FDB00F410BA /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61A7FD741A2F5FDB00F410BA /* GameScene.swift */; };
@@ -28,6 +30,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		6125EBCB1A389025006CC195 /* StartScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StartScene.swift; sourceTree = "<group>"; };
+		6125EBCF1A389073006CC195 /* StartScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = StartScene.sks; sourceTree = "<group>"; };
 		61A7FD6B1A2F5FDB00F410BA /* PENDREAM.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PENDREAM.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		61A7FD6F1A2F5FDB00F410BA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		61A7FD701A2F5FDB00F410BA /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -84,6 +88,8 @@
 				61A7FD701A2F5FDB00F410BA /* AppDelegate.swift */,
 				61A7FD721A2F5FDB00F410BA /* GameScene.sks */,
 				61A7FD741A2F5FDB00F410BA /* GameScene.swift */,
+				6125EBCF1A389073006CC195 /* StartScene.sks */,
+				6125EBCB1A389025006CC195 /* StartScene.swift */,
 				61A7FD761A2F5FDB00F410BA /* GameViewController.swift */,
 				61A7FD781A2F5FDC00F410BA /* Main.storyboard */,
 				61A7FD7B1A2F5FDC00F410BA /* Images.xcassets */,
@@ -201,6 +207,7 @@
 				61A7FD7F1A2F5FDC00F410BA /* LaunchScreen.xib in Resources */,
 				61A7FD7C1A2F5FDC00F410BA /* Images.xcassets in Resources */,
 				61A7FD731A2F5FDB00F410BA /* GameScene.sks in Resources */,
+				6125EBD01A389073006CC195 /* StartScene.sks in Resources */,
 				61A7FD7A1A2F5FDC00F410BA /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -222,6 +229,7 @@
 				61A7FD751A2F5FDB00F410BA /* GameScene.swift in Sources */,
 				61A7FD771A2F5FDB00F410BA /* GameViewController.swift in Sources */,
 				61A7FD711A2F5FDB00F410BA /* AppDelegate.swift in Sources */,
+				6125EBCC1A389025006CC195 /* StartScene.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
