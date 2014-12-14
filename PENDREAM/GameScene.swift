@@ -7,6 +7,7 @@
 //
 
 import SpriteKit
+//import GameViewController
 
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
@@ -370,6 +371,33 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     
+    func resetGame() {
+        
+        gameState = GAME_PLAY
+        
+        
+        // reset Score
+        score = 0
+        resetScore(spriteArray: counterSmallSpriteArray, left: true, score: score)
+        resetScore(spriteArray: scoreSpriteArray, left: false, score: score)
+        
+        
+        // setup 🐧
+        resetPenguin()
+        isOpenUmbrella = true
+        
+        // setup 🐱
+        previousObstacleY = 0
+        for 🐱 in 🐱s {
+            resetObstacle(Sprite: 🐱)
+            previousObstacleY = 🐱.position.y
+        }
+        
+        // animateStart
+        animateStart()
+    }
+    
+    
     func setupGameover() {
         
         // Title of GAMEOVER
@@ -507,13 +535,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     if touchButtonName == "start_button" {
                         println(touchButtonName)
                         resetGame()
-                        
                     } else if (touchButtonName == "ranking_button") {
                         println(touchButtonName)
                     } else if (touchButtonName == "twitter_button") {
-                        println(touchButtonName)
+                        shareSNS("twitter")
                     } else if (touchButtonName == "facebook_button") {
-                        println(touchButtonName)
+                        shareSNS("facebook")
                     } else if (touchButtonName == "back_button") {
                         println(touchButtonName)
                         
@@ -548,6 +575,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         🐧.physicsBody = nil
         
         
+        let userDefaults = NSUserDefaults.standardUserDefaults()
+        
+        bestScore = userDefaults.integerForKey("bestScore")
+        if bestScore < score {
+            userDefaults.setObject(score, forKey: "bestScore")
+            bestScore = score
+        }
+        
+        
         for num in counterSmallSpriteArray {
             num.texture = nil
         }
@@ -556,35 +592,27 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         resetScore(spriteArray: bestSpriteArray, left: false, score: bestScore)
     }
     
-    func resetGame() {
+    func shareSNS(sns:String){
+        let message = "You got \(score) points in PEN DREAM. (-o-)"
+        let userInfo = ["sns": sns.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: true)!, "image": captureGameScreen(), "message": message.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: true)!]
         
-        gameState = GAME_PLAY
-        
-        
-        // reset Score
-        score = 0
-        resetScore(spriteArray: counterSmallSpriteArray, left: true, score: score)
-        resetScore(spriteArray: scoreSpriteArray, left: false, score: score)
-        
-        
-        // setup 🐧
-        resetPenguin()
-        isOpenUmbrella = true
-        
-        // setup 🐱
-        previousObstacleY = 0
-        for 🐱 in 🐱s {
-            resetObstacle(Sprite: 🐱)
-            previousObstacleY = 🐱.position.y
-        }
-        
-        // animateStart
-        animateStart()
+        NSNotificationCenter.defaultCenter().postNotificationName("sns", object: nil, userInfo: userInfo)
     }
-
+    
+    func captureGameScreen() -> NSData {
+        
+        let rect = self.frame
+        UIGraphicsBeginImageContextWithOptions(rect.size, false, UIScreen().scale)
+        self.view?.drawViewHierarchyInRect(rect, afterScreenUpdates: true)
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        let dataSaveImage = UIImagePNGRepresentation(image)
+        
+        return dataSaveImage
+    }
     
     
-    // MARK: StopMotionAnimation
+   // MARK: StopMotionAnimation
     
     // alternate Texture of a Sprite for stop motion animation
     
@@ -597,7 +625,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     
+    
     // MARK: Drawing Path of Sprite
+    
     func drawPath(Sprite sprite:SKSpriteNode) -> CGMutablePath? {
         
         let height = sprite.size.height
