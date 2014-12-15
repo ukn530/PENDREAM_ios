@@ -107,7 +107,7 @@ class StartScene: SKScene {
                     self.view?.presentScene(scene, transition: reveal)
                     
                 } else if (touchButtonName == "ranking_button") {
-                    println(touchButtonName)
+                    showScore()
                 }
             }
         }
@@ -118,6 +118,10 @@ class StartScene: SKScene {
         touchButtonName = nil
     }
     
+    
+    func showScore() {
+        NSNotificationCenter.defaultCenter().postNotificationName("showScore", object: nil, userInfo: nil)
+    }
     
     // MARK: StopMotionAnimation
     

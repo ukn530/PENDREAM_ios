@@ -108,6 +108,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // setup gameover
         goY = -CGRectGetMaxY(self.frame)
         setupGameover()
+        
+        NSNotificationCenter.defaultCenter().postNotificationName("getPlay", object: nil, userInfo: nil)
     }
     
     
@@ -375,7 +377,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         gameState = GAME_PLAY
         
-        
         // reset Score
         score = 0
         resetScore(spriteArray: counterSmallSpriteArray, left: true, score: score)
@@ -534,21 +535,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 if touchButtonName == nodeAtPoint(location).name {
                     if touchButtonName == "start_button" {
                         println(touchButtonName)
+                        NSNotificationCenter.defaultCenter().postNotificationName("getPlay", object: nil, userInfo: nil)
                         resetGame()
                     } else if (touchButtonName == "ranking_button") {
-                        println(touchButtonName)
+                        showScore()
                     } else if (touchButtonName == "twitter_button") {
                         shareSNS("twitter")
                     } else if (touchButtonName == "facebook_button") {
                         shareSNS("facebook")
                     } else if (touchButtonName == "back_button") {
-                        println(touchButtonName)
-                        
                         let reveal = SKTransition.fadeWithColor(UIColor.whiteColor(), duration: 0.5)
                         let scene = StartScene()
                         scene.size = self.frame.size
                         self.view?.presentScene(scene, transition: reveal)
-                        
                     } else if (touchButtonName == "noad_button") {
                         println(touchButtonName)
                     }
@@ -574,13 +573,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         🐧.physicsBody = nil
         
-        
         let userDefaults = NSUserDefaults.standardUserDefaults()
         
         bestScore = userDefaults.integerForKey("bestScore")
         if bestScore < score {
             userDefaults.setObject(score, forKey: "bestScore")
             bestScore = score
+            
+            // send score to Game Center
+            sendScore()
         }
         
         
@@ -590,6 +591,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         resetScore(spriteArray: scoreSpriteArray, left: false, score: score)
         resetScore(spriteArray: bestSpriteArray, left: false, score: bestScore)
+        
+        NSNotificationCenter.defaultCenter().postNotificationName("getOver", object: nil, userInfo: nil)
     }
     
     func shareSNS(sns:String){
@@ -611,6 +614,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         return dataSaveImage
     }
     
+    func sendScore() {
+        let userInfo = ["score": score]
+        NSNotificationCenter.defaultCenter().postNotificationName("sendScore", object: nil, userInfo: userInfo)
+    }
+    
+    func showScore() {
+        NSNotificationCenter.defaultCenter().postNotificationName("showScore", object: nil, userInfo: nil)
+    }
     
    // MARK: StopMotionAnimation
     
