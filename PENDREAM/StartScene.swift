@@ -25,6 +25,7 @@ class StartScene: SKScene {
         background.anchorPoint = CGPoint(x: 0, y: 0)
         self.addChild(background)
         
+        
         // scessor
         let scessorSprite = SKSpriteNode(imageNamed: "st_scessor_l")
         scessorSprite.position = CGPoint(x: 0, y: CGRectGetMaxY(self.frame))
@@ -40,13 +41,13 @@ class StartScene: SKScene {
         // pen
         let penSprite = SKSpriteNode(imageNamed: "st_pen_l")
         penSprite.position = CGPoint(x: 0, y: CGRectGetMidY(self.frame))
-        penSprite.anchorPoint = CGPoint(x: 0.1, y: 0.8)
+        penSprite.anchorPoint = CGPoint(x: 0.1, y: 0.65)
         self.addChild(penSprite)
         
         // erasorSprite
         let erasorSprite = SKSpriteNode(imageNamed: "st_erasor_r")
         erasorSprite.position = CGPoint(x: CGRectGetMaxX(self.frame), y: CGRectGetMidY(self.frame))
-        erasorSprite.anchorPoint = CGPoint(x: 0.9, y: 0.7)
+        erasorSprite.anchorPoint = CGPoint(x: 0.9, y: 0.65)
         self.addChild(erasorSprite)
         
         // logo
@@ -56,15 +57,18 @@ class StartScene: SKScene {
         
         // Start Button
         alternateTexture(Sprite: startButtonSprite, ImageName1: "button_start1", ImageName2: "button_start2")
-        startButtonSprite.position = CGPoint(x: CGRectGetMidX(self.frame), y: CGRectGetMidY(self.frame)/2)
+        startButtonSprite.position = CGPoint(x: CGRectGetMidX(self.frame), y: CGRectGetMidY(self.frame)*13/20)
         startButtonSprite.name = "start_button"
+        startButtonSprite.zPosition = 2
         self.addChild(startButtonSprite)
         
         // Ranking Button
         alternateTexture(Sprite: rankingButtonSprite, ImageName1: "button_ranking1", ImageName2: "button_ranking2")
-        rankingButtonSprite.position = CGPoint(x: CGRectGetMidX(self.frame), y: CGRectGetMidY(self.frame)*1/4)
+        rankingButtonSprite.position = CGPoint(x: CGRectGetMidX(self.frame), y: CGRectGetMidY(self.frame)*2/5)
         rankingButtonSprite.name = "ranking_button"
+        startButtonSprite.zPosition = 2
         self.addChild(rankingButtonSprite)
+
     }
     
     
@@ -104,6 +108,7 @@ class StartScene: SKScene {
                     let reveal = SKTransition.fadeWithColor(UIColor.whiteColor(), duration: 0.5)
                     let scene = GameScene()
                     scene.size = self.frame.size
+                    scene.scaleMode = .AspectFill
                     self.view?.presentScene(scene, transition: reveal)
                     
                 } else if (touchButtonName == "ranking_button") {

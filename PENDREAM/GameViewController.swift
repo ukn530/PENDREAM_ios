@@ -6,11 +6,12 @@
 //  Copyright (c) 2014 ukn. All rights reserved.
 //
 
-//import UIKit
+import UIKit
 import SpriteKit
 import Social
 import GameKit
 import iAd
+import StoreKit
 
 
 extension SKNode {
@@ -29,7 +30,7 @@ extension SKNode {
     }
 }
 
-class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBannerViewDelegate {
+class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBannerViewDelegate, SKProductsRequestDelegate, SKPaymentTransactionObserver {
     
     let banner = ADBannerView(frame: CGRectZero)
     
@@ -41,35 +42,135 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBa
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "showScore:", name: "showScore", object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "getOver:", name: "getOver", object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "getPlay:", name: "getPlay", object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "startInAppPurchase:", name: "noAds", object: nil)
         
         authenticateLocalPlayer()
         
-        if let scene = StartScene.unarchiveFromFile("StartScene") as? StartScene {
+        if let scene = StartScene.unarchiveFromFile("GameScene") as? StartScene {
             // Configure the view.
-            let skView = self.originalContentView as SKView
+            let skView = self.view as SKView
             //skView.showsFPS = true
             //skView.showsNodeCount = true
-            skView.showsPhysics = true
+            //skView.showsPhysics = true
             
             /* Sprite Kit applies additional optimizations to improve rendering performance */
             skView.ignoresSiblingOrder = true
             
             /* Set the scale mode to scale to fit the window */
             scene.scaleMode = .AspectFill
-            
+            println("scene.width = \(scene.frame.width)")
+            println("scene.height = \(scene.frame.height)")
             skView.presentScene(scene)
         }
-        
-        banner.frame.origin.y = -CGRectGetHeight(banner.frame)
-        banner.delegate = self
-        banner.sizeToFit()
-        banner.hidden = true
-        self.view.addSubview(banner)
-    }
 
+        let userDefaults = NSUserDefaults.standardUserDefaults()
+        let isPurchased: Bool = userDefaults.boolForKey("isPurchased")
+        if !isPurchased {
+            banner.frame.origin.y = CGRectGetHeight(self.view.frame)
+            banner.delegate = self
+            banner.sizeToFit()
+            banner.hidden = true
+            self.view.addSubview(banner)
+        }
+        
+        println("check in app purchase = \(checkInAppPurchase())")
+
+        /*
+        let view = UIView()
+        view.frame = self.view.frame
+        view.backgroundColor = UIColor.whiteColor()
+        self.view.addSubview(view)
+        let interstitial = ADInterstitialAd()
+        interstitial.delegate = self
+        interstitial.presentInView(view)
+        println(interstitial.loaded)
+*/
+    }
+    
+    func checkInAppPurchase() -> Bool {
+        if !SKPaymentQueue.canMakePayments() {
+            
+            let alert = UIAlertView(title: "Error", message: "You can not use in-app-billing", delegate: nil, cancelButtonTitle: "OK")
+            alert.show()
+            return false
+        }
+        return true
+    }
+    
     override func shouldAutorotate() -> Bool {
         return true
     }
+    
+    func startInAppPurchase(notification: NSNotification) {
+        println("startInAppPurchase")
+        let set = NSSet(objects: "noAds")
+        let productsRequest = SKProductsRequest(productIdentifiers: set)
+        productsRequest.delegate = self
+        productsRequest.start()
+    }
+    
+    
+    func productsRequest(request: SKProductsRequest!, didReceiveResponse response: SKProductsResponse!) {
+        
+        println("response.invalidProductIdentifiers.count=\(response.invalidProductIdentifiers.count)")
+        if response.invalidProductIdentifiers.count > 0 {
+            let alert = UIAlertView(title: "Error", message: "\(response.invalidProductIdentifiers[0]) is invalid", delegate: nil, cancelButtonTitle: "OK")
+            alert.show()
+            return
+        }
+        
+        SKPaymentQueue.defaultQueue().addTransactionObserver(self)
+        
+        println("product request response.products")
+        for product in response.products {
+            println("product.title=\(product.localizedTitle)")
+            let payment = SKPayment(product: product as SKProduct)
+            SKPaymentQueue.defaultQueue().addPayment(payment)
+            println("payment Queue")
+        }
+
+    }
+    
+    
+    func paymentQueue(queue: SKPaymentQueue!, updatedTransactions transactions: [AnyObject]!) {
+        println("transactions count == \(transactions.count)")
+        for transaction in transactions {
+            println("transactionIdentifier = \(transaction.transactionIdentifier)")
+            if transaction.transactionState == SKPaymentTransactionState.Purchased {
+                println("purchased")
+                let userDefaults = NSUserDefaults.standardUserDefaults()
+                userDefaults.setBool(true, forKey: "isPurchased")
+                banner.removeFromSuperview()
+                NSNotificationCenter.defaultCenter().postNotificationName("purchased", object: nil, userInfo: nil)
+                queue.finishTransaction(transaction as SKPaymentTransaction)
+            } else if transaction.transactionState == SKPaymentTransactionState.Purchasing {
+                println("purchasing")
+            } else if transaction.transactionState == SKPaymentTransactionState.Failed {
+                println("failed")
+                queue.finishTransaction(transaction as SKPaymentTransaction)
+            } else if transaction.transactionState == SKPaymentTransactionState.Restored {
+                println("restored")
+                queue.finishTransaction(transaction as SKPaymentTransaction)
+            } else {
+                println("else")
+                queue.finishTransaction(transaction as SKPaymentTransaction)
+            }
+        }
+    }
+    
+    func paymentQueue(queue: SKPaymentQueue!, restoreCompletedTransactionsFailedWithError error: NSError!) {
+        println("failed Restore")
+    }
+    
+    func paymentQueueRestoreCompletedTransactionsFinished(queue: SKPaymentQueue!) {
+        println("complete every Restore")
+    }
+    
+    func paymentQueue(queue: SKPaymentQueue!, removedTransactions transactions: [AnyObject]!) {
+        println("removedTransactions")
+        SKPaymentQueue.defaultQueue().removeTransactionObserver(self)
+    }
+    
 
     override func supportedInterfaceOrientations() -> Int {
         if UIDevice.currentDevice().userInterfaceIdiom == .Phone {
@@ -95,20 +196,20 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBa
     
     func bannerView(banner: ADBannerView!, didFailToReceiveAdWithError error: NSError!) {
         println(error)
-        banner.frame.origin.y = -CGRectGetHeight(banner.frame)
+        banner.frame.origin.y = CGRectGetHeight(self.view.frame)
     }
     
     func getOver(notification: NSNotification) {
         
         UIView.beginAnimations("animateAdBannerOn", context: nil)
         UIView.setAnimationDuration(0.3)
-        banner.frame.origin.y = 0
+        banner.frame.origin.y = CGRectGetHeight(self.view.frame) - CGRectGetHeight(banner.frame)
         UIView.commitAnimations()
     }
     
     func getPlay(notification: NSNotification) {
         
-        banner.frame.origin.y = -CGRectGetHeight(banner.frame)
+        banner.frame.origin.y = CGRectGetHeight(self.view.frame)
     }
     
     func showSNSSheet(notification: NSNotification) {

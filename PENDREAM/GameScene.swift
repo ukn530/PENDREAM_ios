@@ -66,7 +66,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let GAME_OVER = 1
     var gameState = 0
     
-    
+    var isPurchased: Bool = false
     
     
     // MARK: Setup
@@ -110,6 +110,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         setupGameover()
         
         NSNotificationCenter.defaultCenter().postNotificationName("getPlay", object: nil, userInfo: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "purchased:", name: "purchased", object: nil)
+
     }
     
     
@@ -131,6 +133,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             
             animateOver()
         }
+
     }
     
     
@@ -201,8 +204,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             overCounter = 0
             if goY < -1 {
                 
-                gameoverTitle.position.y = CGRectGetMidY(self.frame) * 5 / 3 + goY
-                board.position.y = CGRectGetMidY(self.frame)*1.2 + goY
+                board.position.y = CGRectGetMidY(self.frame)*1.25 + goY
+                gameoverTitle.position.y = board.position.y + board.size.height * 7/10
                 scoreText.position.y = board.position.y + board.size.height/16
                 bestText.position.y = board.position.y - board.size.height/3
                 
@@ -218,8 +221,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 fbButton.position.y = board.position.y - board.size.height * 8/11
                 startButton.position.y = board.position.y - board.size.height * 11/10
                 rankingButton.position.y = board.position.y - board.size.height * 3/2
-                backButton.position.y = 0 + goY
-                noadButton.position.y = 0 + goY
+                
+                if CGRectGetHeight(UIScreen.mainScreen().bounds) < 568 && !isPurchased {
+                    twButton.position.y = board.position.y - board.size.height * 13/20
+                    fbButton.position.y = board.position.y - board.size.height * 13/20
+                    startButton.position.y = board.position.y - board.size.height*19/20
+                    rankingButton.position.y = board.position.y - board.size.height*13/10
+                }
+                backButton.position.y = board.position.y - board.size.height * 9/10
+                noadButton.position.y = board.position.y - board.size.height * 9/10
                 
                 goY /= 1.2
             }
@@ -230,8 +240,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         if goY >= -CGRectGetMaxY(self.frame) {
             
-            gameoverTitle.position.y = CGRectGetMidY(self.frame) * 5 / 3 + goY
-            board.position.y = CGRectGetMidY(self.frame)*1.2 + goY
+            board.position.y = CGRectGetMidY(self.frame) * 1.25 + goY
+            gameoverTitle.position.y = board.position.y + board.size.height * 7/10
             scoreText.position.y = board.position.y + board.size.height/16
             bestText.position.y = board.position.y - board.size.height/3
             
@@ -247,8 +257,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             fbButton.position.y = board.position.y - board.size.height * 8/11
             startButton.position.y = board.position.y - board.size.height * 11/10
             rankingButton.position.y = board.position.y - board.size.height * 3/2
-            backButton.position.y = 0 + goY
-            noadButton.position.y = 0 + goY
+            
+            if CGRectGetHeight(UIScreen.mainScreen().bounds) < 568 && !isPurchased {
+                twButton.position.y = board.position.y - board.size.height * 13/20
+                fbButton.position.y = board.position.y - board.size.height * 13/20
+                startButton.position.y = board.position.y - board.size.height*19/20
+                rankingButton.position.y = board.position.y - board.size.height*13/10
+            }
+            
+            backButton.position.y = board.position.y - board.size.height * 9/10
+            noadButton.position.y = board.position.y - board.size.height * 9/10
             
             goY -= 100
         }
@@ -311,7 +329,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             🐱.anchorPoint = CGPoint(x:1.0, y:0)
         }
         
-        🐱.physicsBody = SKPhysicsBody(edgeLoopFromPath: drawPath(Sprite: 🐱))
+        🐱.physicsBody = SKPhysicsBody(polygonFromPath: drawPath(Sprite: 🐱))
+        🐱.physicsBody?.affectedByGravity = false
+        🐱.physicsBody?.categoryBitMask = penguinCategory
+        🐱.physicsBody?.contactTestBitMask = obstacleCategory
     }
     
     func resetScore(spriteArray sArray: [SKSpriteNode], left isLeft: Bool, score sc: Int) {
@@ -401,17 +422,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func setupGameover() {
         
-        // Title of GAMEOVER
-        alternateTexture(Sprite: gameoverTitle, ImageName1: "gameover1", ImageName2: "gameover2")
-        gameoverTitle.position = CGPoint(x: CGRectGetMidX(self.frame), y: CGRectGetMidY(self.frame) * 5 / 3 + goY)
-        gameoverTitle.zPosition = 2
-        self.addChild(gameoverTitle)
-        
         // Board of Score
         alternateTexture(Sprite: board, ImageName1: "board1", ImageName2: "board2")
-        board.position = CGPoint(x: CGRectGetMidX(self.frame), y: CGRectGetMidY(self.frame)*1.2 + goY)
+        board.position = CGPoint(x: CGRectGetMidX(self.frame), y: CGRectGetMidY(self.frame)*1.25 + goY)
         board.zPosition = 2
         self.addChild(board)
+        
+        // Title of GAMEOVER
+        alternateTexture(Sprite: gameoverTitle, ImageName1: "gameover1", ImageName2: "gameover2")
+        gameoverTitle.position = CGPoint(x: CGRectGetMidX(self.frame), y: board.position.y + board.size.height * 7/10)
+        gameoverTitle.zPosition = 2
+        self.addChild(gameoverTitle)
         
         // Score on Board
         scoreText.anchorPoint = CGPoint(x: 0, y: 0)
@@ -448,12 +469,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         // Twitter Button
         twButton.position = CGPoint(x: board.position.x * 3 / 4, y: board.position.y - board.size.height * 8/11)
+        if CGRectGetHeight(UIScreen.mainScreen().bounds) < 568 && !isPurchased {
+            twButton.position.y = board.position.y - board.size.height * 13/20
+        }
         twButton.zPosition = 2
         twButton.name = "twitter_button"
         self.addChild(twButton)
         
         // Facebook Button
         fbButton.position = CGPoint(x: board.position.x * 5 / 4, y: board.position.y - board.size.height * 8/11)
+        if CGRectGetHeight(UIScreen.mainScreen().bounds) < 568 && !isPurchased {
+            fbButton.position.y = board.position.y - board.size.height * 13/20
+        }
         fbButton.zPosition = 2
         fbButton.name = "facebook_button"
         self.addChild(fbButton)
@@ -461,6 +488,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Start Button
         alternateTexture(Sprite: startButton, ImageName1: "button_start1", ImageName2: "button_start2")
         startButton.position = CGPoint(x: board.position.x, y: board.position.y - board.size.height * 11/10)
+        if CGRectGetHeight(UIScreen.mainScreen().bounds) < 568 && !isPurchased{
+            startButton.position.y = board.position.y - board.size.height*19/20
+        }
         startButton.zPosition = 2
         startButton.name = "start_button"
         self.addChild(startButton)
@@ -468,23 +498,31 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Ranking Button
         alternateTexture(Sprite: rankingButton, ImageName1: "button_ranking1", ImageName2: "button_ranking2")
         rankingButton.position = CGPoint(x: board.position.x, y: board.position.y - board.size.height * 15/10)
+        if CGRectGetHeight(UIScreen.mainScreen().bounds) < 568 && !isPurchased {
+            rankingButton.position.y = board.position.y - board.size.height*13/10
+        }
         rankingButton.zPosition = 2
         rankingButton.name = "ranking_button"
         self.addChild(rankingButton)
         
         // Back Button
-        backButton.anchorPoint = CGPoint(x: 0, y: 0)
-        backButton.position = CGPoint(x: 0, y: 0 + goY)
+        backButton.anchorPoint = CGPoint(x: 0, y: 0.5)
+        backButton.position = CGPoint(x: 0, y: board.position.y - board.size.height * 9/10)
         backButton.zPosition = 2
         backButton.name = "back_button"
         self.addChild(backButton)
         
-        // NoAd Button
-        noadButton.anchorPoint = CGPoint(x: 1, y: 0)
-        noadButton.position = CGPoint(x:CGRectGetMaxX(self.frame), y: 0 + goY)
-        noadButton.zPosition = 2
-        noadButton.name = "noad_button"
-        self.addChild(noadButton)
+        
+        let userDefaults = NSUserDefaults.standardUserDefaults()
+        isPurchased = userDefaults.boolForKey("isPurchased")
+        if !isPurchased {
+            // NoAd Button
+            noadButton.anchorPoint = CGPoint(x: 1, y: 0.5)
+            noadButton.position = CGPoint(x:CGRectGetMaxX(self.frame), y: board.position.y - board.size.height * 10/11)
+            noadButton.zPosition = 2
+            noadButton.name = "noad_button"
+            self.addChild(noadButton)
+        }
     }
     
     
@@ -513,6 +551,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     twButton.texture = SKTexture(imageNamed: "button_twitter_on")
                 } else if (touchButtonName == "facebook_button") {
                     fbButton.texture = SKTexture(imageNamed: "button_facebook_on")
+                } else if (touchButtonName == "back_button") {
+                    backButton.texture = SKTexture(imageNamed: "button_back_on")
+                } else if (touchButtonName == "noad_button") {
+                    noadButton.texture = SKTexture(imageNamed: "button_noads_on")
                 }
             }
         }
@@ -547,9 +589,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                         let reveal = SKTransition.fadeWithColor(UIColor.whiteColor(), duration: 0.5)
                         let scene = StartScene()
                         scene.size = self.frame.size
+                        scene.scaleMode = .AspectFill
                         self.view?.presentScene(scene, transition: reveal)
                     } else if (touchButtonName == "noad_button") {
                         println(touchButtonName)
+                        NSNotificationCenter.defaultCenter().postNotificationName("noAds", object: nil, userInfo: nil)
                     }
                 }
             }
@@ -558,6 +602,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             alternateTexture(Sprite: rankingButton, ImageName1: "button_ranking1", ImageName2: "button_ranking2")
             twButton.texture = SKTexture(imageNamed: "button_twitter")
             fbButton.texture = SKTexture(imageNamed: "button_facebook")
+            backButton.texture = SKTexture(imageNamed: "button_back")
+            noadButton.texture = SKTexture(imageNamed: "button_noads")
             
             touchButtonName = nil
         }
@@ -622,6 +668,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func showScore() {
         NSNotificationCenter.defaultCenter().postNotificationName("showScore", object: nil, userInfo: nil)
     }
+    
+    func purchased(notification: NSNotification) {
+        println("noadButton.removeFromParent()")
+        noadButton.removeFromParent()
+    }
+    
     
    // MARK: StopMotionAnimation
     
