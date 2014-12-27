@@ -68,16 +68,35 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     var isPurchased: Bool = false
     
+    // sound
+    let bgmSound = Sound()
+    let collisionSound = Sound()
+    let fallingSound = Sound()
+    let fallingvoiceSound = Sound()
+    let foldPaperSound = Sound()
+    let tapSound = Sound()
+    
     
     // MARK: Setup
     
     override func didMoveToView(view: SKView) {
         
+        //sound play
+        bgmSound.prepareSound("bgm")
+        collisionSound.prepareSound("collision")
+        fallingSound.prepareSound("falling")
+        fallingvoiceSound.prepareSound("fallingvoice")
+        foldPaperSound.prepareSound("foldpaper")
+        tapSound.prepareSound("tap")
+        
+        bgmSound.playSound()
+        foldPaperSound.playSound()
+        
         // setup background
         let background = SKSpriteNode(imageNamed: "background")
         background.anchorPoint = CGPoint(x: 0, y: 0)
         self.addChild(background)
-       
+        
         // setup collision
         self.physicsWorld.contactDelegate = self
         
@@ -270,7 +289,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             
             goY -= 100
         }
-
     }
     
     
@@ -532,29 +550,36 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         if gameState == GAME_PLAY {
             isOpenUmbrella = false
+            fallingSound.playSound()
+            fallingvoiceSound.playSound()
             alternateTexture(Sprite: 🐧, ImageName1: "penguin_close1", ImageName2: "penguin_close2")
             🐧.physicsBody = SKPhysicsBody(polygonFromPath: drawPath(Sprite: 🐧))
             🐧.physicsBody?.affectedByGravity = false
             🐧.physicsBody?.categoryBitMask = obstacleCategory
             🐧.physicsBody?.contactTestBitMask = penguinCategory
         } else if (gameState == GAME_OVER) {
-            
             for touch: AnyObject in touches {
                 let location = touch.locationInNode(self)
                 touchButtonName = nodeAtPoint(location).name
                 
                 if touchButtonName == "start_button" {
                     alternateTexture(Sprite: startButton, ImageName1: "button_start_on1", ImageName2: "button_start_on2")
+                    tapSound.playSound()
                 } else if (touchButtonName == "ranking_button") {
                     alternateTexture(Sprite: rankingButton, ImageName1: "button_ranking_on1", ImageName2: "button_ranking_on2")
+                    tapSound.playSound()
                 } else if (touchButtonName == "twitter_button") {
                     twButton.texture = SKTexture(imageNamed: "button_twitter_on")
+                    tapSound.playSound()
                 } else if (touchButtonName == "facebook_button") {
                     fbButton.texture = SKTexture(imageNamed: "button_facebook_on")
+                    tapSound.playSound()
                 } else if (touchButtonName == "back_button") {
                     backButton.texture = SKTexture(imageNamed: "button_back_on")
+                    tapSound.playSound()
                 } else if (touchButtonName == "noad_button") {
                     noadButton.texture = SKTexture(imageNamed: "button_noads_on")
+                    tapSound.playSound()
                 }
             }
         }
@@ -563,6 +588,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func touchesEnded(touches: NSSet, withEvent event: UIEvent) {
         
+        fallingSound.stopSound()
         if gameState == GAME_PLAY {
             isOpenUmbrella = true
             alternateTexture(Sprite: 🐧, ImageName1: "penguin_open1", ImageName2: "penguin_open2")
@@ -579,6 +605,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                         println(touchButtonName)
                         NSNotificationCenter.defaultCenter().postNotificationName("getPlay", object: nil, userInfo: nil)
                         resetGame()
+                        bgmSound.playSound()
                     } else if (touchButtonName == "ranking_button") {
                         showScore()
                     } else if (touchButtonName == "twitter_button") {
@@ -611,6 +638,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     
     func didBeginContact(contact: SKPhysicsContact!) {
+        collisionSound.playSound()
+        bgmSound.stopSound()
         
         gameState = GAME_OVER
         

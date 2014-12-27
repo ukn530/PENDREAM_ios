@@ -16,6 +16,9 @@ class StartScene: SKScene {
     let rankingButtonSprite = SKSpriteNode()
     var touchButtonName: String? = nil
     
+    let tapSound = Sound()
+    let foldpaper = Sound()
+    
     // MARK: Start
     
     override func didMoveToView(view: SKView) {
@@ -68,7 +71,8 @@ class StartScene: SKScene {
         rankingButtonSprite.name = "ranking_button"
         startButtonSprite.zPosition = 2
         self.addChild(rankingButtonSprite)
-
+        
+        tapSound.prepareSound("tap")
     }
     
     
@@ -90,8 +94,10 @@ class StartScene: SKScene {
             
             if touchButtonName == "start_button" {
                 alternateTexture(Sprite: startButtonSprite, ImageName1: "button_start_on1", ImageName2: "button_start_on2")
+                tapSound.playSound()
             } else if (touchButtonName == "ranking_button") {
                 alternateTexture(Sprite: rankingButtonSprite, ImageName1: "button_ranking_on1", ImageName2: "button_ranking_on2")
+                tapSound.playSound()
             }
         }
     }
