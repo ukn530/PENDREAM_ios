@@ -116,9 +116,10 @@ class StartScene: SKScene {
                     scene.size = self.frame.size
                     scene.scaleMode = .AspectFill
                     self.view?.presentScene(scene, transition: reveal)
-                    
+                    Flurry.logEvent("TapStartInStartScene")
                 } else if (touchButtonName == "ranking_button") {
                     showScore()
+                    Flurry.logEvent("TapRankingInStartScene")
                 }
             }
         }

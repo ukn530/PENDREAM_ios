@@ -606,21 +606,27 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                         NSNotificationCenter.defaultCenter().postNotificationName("getPlay", object: nil, userInfo: nil)
                         resetGame()
                         bgmSound.playSound()
+                        Flurry.logEvent("TapStartInGameScene")
                     } else if (touchButtonName == "ranking_button") {
                         showScore()
+                        Flurry.logEvent("TapRankingInGameScene")
                     } else if (touchButtonName == "twitter_button") {
                         shareSNS("twitter")
+                        Flurry.logEvent("TapTwitterInGameScene")
                     } else if (touchButtonName == "facebook_button") {
                         shareSNS("facebook")
+                        Flurry.logEvent("TapFacebookInGameScene")
                     } else if (touchButtonName == "back_button") {
                         let reveal = SKTransition.fadeWithColor(UIColor.whiteColor(), duration: 0.5)
                         let scene = StartScene()
                         scene.size = self.frame.size
                         scene.scaleMode = .AspectFill
                         self.view?.presentScene(scene, transition: reveal)
+                        Flurry.logEvent("TapBackInGameScene")
                     } else if (touchButtonName == "noad_button") {
                         println(touchButtonName)
                         NSNotificationCenter.defaultCenter().postNotificationName("noAds", object: nil, userInfo: nil)
+                        Flurry.logEvent("TapNoadsInGameScene")
                     }
                 }
             }
@@ -649,7 +655,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         🐧.physicsBody = nil
         
         let userDefaults = NSUserDefaults.standardUserDefaults()
-        
+        var playTimes: Int = userDefaults.integerForKey("playTimes")
+        playTimes++
+        userDefaults.setObject(playTimes, forKey: "playTimes")
         bestScore = userDefaults.integerForKey("bestScore")
         if bestScore < score {
             userDefaults.setObject(score, forKey: "bestScore")
@@ -658,7 +666,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             // send score to Game Center
             sendScore()
         }
-        
+        println("playTimes = \(playTimes)")
+        //Send to Flurry for Analytics
+        var scoreDictionary: [String: Int] = ["playTime": userDefaults.integerForKey("playTimes"), "score": score, "bestScore": bestScore]
+        Flurry.logEvent("gameOver", withParameters: scoreDictionary, timed: true)
         
         for num in counterSmallSpriteArray {
             num.texture = nil
@@ -701,6 +712,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func purchased(notification: NSNotification) {
         println("noadButton.removeFromParent()")
         noadButton.removeFromParent()
+        
+        let userDefaults = NSUserDefaults.standardUserDefaults()
+        var scoreDictionary: [String: Int] = ["playTime": userDefaults.integerForKey("playTimes"), "score": score, "bestScore": bestScore]
+        Flurry.logEvent("purchased", withParameters: scoreDictionary, timed: true)
     }
     
     

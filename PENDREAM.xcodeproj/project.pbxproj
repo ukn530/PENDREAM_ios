@@ -11,6 +11,7 @@
 		6125EBD01A389073006CC195 /* StartScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 6125EBCF1A389073006CC195 /* StartScene.sks */; };
 		6136E59A1A3D71D500BDD163 /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6136E5991A3D71D500BDD163 /* GameKit.framework */; };
 		615932BF1A3C966A0093B827 /* Social.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 615932BE1A3C966A0093B827 /* Social.framework */; };
+		616A0A641A4FD3F5009DA467 /* swift.gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 616A0A631A4FD3F5009DA467 /* swift.gitignore */; };
 		618086621A3F0D35004F540A /* iAd.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 618086611A3F0D35004F540A /* iAd.framework */; };
 		61A7FD711A2F5FDB00F410BA /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61A7FD701A2F5FDB00F410BA /* AppDelegate.swift */; };
 		61A7FD731A2F5FDB00F410BA /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 61A7FD721A2F5FDB00F410BA /* GameScene.sks */; };
@@ -29,6 +30,9 @@
 		61F217C61A4EED3C0099AA3D /* tap.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 61F217C01A4EED3C0099AA3D /* tap.mp3 */; };
 		61F217C81A4EED930099AA3D /* Sound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61F217C71A4EED930099AA3D /* Sound.swift */; };
 		61F217CA1A4EEE180099AA3D /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61F217C91A4EEE180099AA3D /* AVFoundation.framework */; };
+		61F217CE1A4FBA500099AA3D /* libFlurry_6.0.0.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 61F217CD1A4FBA500099AA3D /* libFlurry_6.0.0.a */; };
+		61F217D01A4FBB790099AA3D /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61F217CF1A4FBB790099AA3D /* SystemConfiguration.framework */; };
+		61F217D71A4FBE370099AA3D /* Strings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61F217D61A4FBE370099AA3D /* Strings.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +50,7 @@
 		6125EBCF1A389073006CC195 /* StartScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = StartScene.sks; sourceTree = "<group>"; };
 		6136E5991A3D71D500BDD163 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
 		615932BE1A3C966A0093B827 /* Social.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Social.framework; path = System/Library/Frameworks/Social.framework; sourceTree = SDKROOT; };
+		616A0A631A4FD3F5009DA467 /* swift.gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = swift.gitignore; sourceTree = SOURCE_ROOT; };
 		618086611A3F0D35004F540A /* iAd.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = iAd.framework; path = System/Library/Frameworks/iAd.framework; sourceTree = SDKROOT; };
 		61A7FD6B1A2F5FDB00F410BA /* PENDREAM.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PENDREAM.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		61A7FD6F1A2F5FDB00F410BA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -68,6 +73,11 @@
 		61F217C01A4EED3C0099AA3D /* tap.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = tap.mp3; sourceTree = "<group>"; };
 		61F217C71A4EED930099AA3D /* Sound.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sound.swift; sourceTree = "<group>"; };
 		61F217C91A4EEE180099AA3D /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		61F217CC1A4FBA500099AA3D /* Flurry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Flurry.h; sourceTree = "<group>"; };
+		61F217CD1A4FBA500099AA3D /* libFlurry_6.0.0.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libFlurry_6.0.0.a; sourceTree = "<group>"; };
+		61F217CF1A4FBB790099AA3D /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		61F217D51A4FBD430099AA3D /* BridgeHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BridgeHeader.h; sourceTree = "<group>"; };
+		61F217D61A4FBE370099AA3D /* Strings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Strings.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,10 +85,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				61F217D01A4FBB790099AA3D /* SystemConfiguration.framework in Frameworks */,
 				61F217CA1A4EEE180099AA3D /* AVFoundation.framework in Frameworks */,
 				61C125571A407EB100F66ED5 /* StoreKit.framework in Frameworks */,
 				618086621A3F0D35004F540A /* iAd.framework in Frameworks */,
 				6136E59A1A3D71D500BDD163 /* GameKit.framework in Frameworks */,
+				61F217CE1A4FBA500099AA3D /* libFlurry_6.0.0.a in Frameworks */,
 				615932BF1A3C966A0093B827 /* Social.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -96,6 +108,7 @@
 		61A7FD621A2F5FDB00F410BA = {
 			isa = PBXGroup;
 			children = (
+				61F217CF1A4FBB790099AA3D /* SystemConfiguration.framework */,
 				61F217C91A4EEE180099AA3D /* AVFoundation.framework */,
 				61C125561A407EB100F66ED5 /* StoreKit.framework */,
 				618086611A3F0D35004F540A /* iAd.framework */,
@@ -119,6 +132,8 @@
 		61A7FD6D1A2F5FDB00F410BA /* PENDREAM */ = {
 			isa = PBXGroup;
 			children = (
+				616A0A631A4FD3F5009DA467 /* swift.gitignore */,
+				61F217D51A4FBD430099AA3D /* BridgeHeader.h */,
 				61A7FD701A2F5FDB00F410BA /* AppDelegate.swift */,
 				61A7FD721A2F5FDB00F410BA /* GameScene.sks */,
 				61A7FD741A2F5FDB00F410BA /* GameScene.swift */,
@@ -126,9 +141,11 @@
 				6125EBCB1A389025006CC195 /* StartScene.swift */,
 				61A7FD761A2F5FDB00F410BA /* GameViewController.swift */,
 				61F217C71A4EED930099AA3D /* Sound.swift */,
+				61F217D61A4FBE370099AA3D /* Strings.swift */,
 				61A7FD781A2F5FDC00F410BA /* Main.storyboard */,
 				61A7FD7B1A2F5FDC00F410BA /* Images.xcassets */,
 				61A7FD7D1A2F5FDC00F410BA /* LaunchScreen.xib */,
+				61F217CB1A4FBA500099AA3D /* Flurry */,
 				61A7FD6E1A2F5FDB00F410BA /* Supporting Files */,
 			);
 			path = PENDREAM;
@@ -163,6 +180,15 @@
 				61A7FD891A2F5FDC00F410BA /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		61F217CB1A4FBA500099AA3D /* Flurry */ = {
+			isa = PBXGroup;
+			children = (
+				61F217CC1A4FBA500099AA3D /* Flurry.h */,
+				61F217CD1A4FBA500099AA3D /* libFlurry_6.0.0.a */,
+			);
+			path = Flurry;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -253,6 +279,7 @@
 			files = (
 				61F217C41A4EED3C0099AA3D /* fallingvoice.mp3 in Resources */,
 				61A7FD7F1A2F5FDC00F410BA /* LaunchScreen.xib in Resources */,
+				616A0A641A4FD3F5009DA467 /* swift.gitignore in Resources */,
 				61F217C21A4EED3C0099AA3D /* collision.mp3 in Resources */,
 				61A7FD7C1A2F5FDC00F410BA /* Images.xcassets in Resources */,
 				61A7FD731A2F5FDB00F410BA /* GameScene.sks in Resources */,
@@ -283,6 +310,7 @@
 				61A7FD751A2F5FDB00F410BA /* GameScene.swift in Sources */,
 				61A7FD771A2F5FDB00F410BA /* GameViewController.swift in Sources */,
 				61A7FD711A2F5FDB00F410BA /* AppDelegate.swift in Sources */,
+				61F217D71A4FBE370099AA3D /* Strings.swift in Sources */,
 				6125EBCC1A389025006CC195 /* StartScene.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -411,8 +439,13 @@
 				INFOPLIST_FILE = PENDREAM/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/PENDREAM/Flurry",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
+				SWIFT_OBJC_BRIDGING_HEADER = /Users/ukn/Documents/iOS/PENDREAM/PENDREAM/BridgeHeader.h;
 			};
 			name = Debug;
 		};
@@ -425,8 +458,13 @@
 				INFOPLIST_FILE = PENDREAM/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/PENDREAM/Flurry",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
+				SWIFT_OBJC_BRIDGING_HEADER = /Users/ukn/Documents/iOS/PENDREAM/PENDREAM/BridgeHeader.h;
 			};
 			name = Release;
 		};

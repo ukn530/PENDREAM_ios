@@ -103,7 +103,7 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBa
     
     func startInAppPurchase(notification: NSNotification) {
         println("startInAppPurchase")
-        let set = NSSet(objects: "noAds")
+        let set = NSSet(objects: adProductId)
         let productsRequest = SKProductsRequest(productIdentifiers: set)
         productsRequest.delegate = self
         productsRequest.start()
