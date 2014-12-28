@@ -10,3 +10,5 @@ import Foundation
 
 let flurryApiKey = "PS6Q8877WHTBVKQZHSGT"
 let adProductId = "noAds"
+
+//test
