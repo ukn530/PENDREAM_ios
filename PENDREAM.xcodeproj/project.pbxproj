@@ -11,7 +11,6 @@
 		6125EBD01A389073006CC195 /* StartScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 6125EBCF1A389073006CC195 /* StartScene.sks */; };
 		6136E59A1A3D71D500BDD163 /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6136E5991A3D71D500BDD163 /* GameKit.framework */; };
 		615932BF1A3C966A0093B827 /* Social.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 615932BE1A3C966A0093B827 /* Social.framework */; };
-		616A0A641A4FD3F5009DA467 /* swift.gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 616A0A631A4FD3F5009DA467 /* swift.gitignore */; };
 		618086621A3F0D35004F540A /* iAd.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 618086611A3F0D35004F540A /* iAd.framework */; };
 		61A7FD711A2F5FDB00F410BA /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61A7FD701A2F5FDB00F410BA /* AppDelegate.swift */; };
 		61A7FD731A2F5FDB00F410BA /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 61A7FD721A2F5FDB00F410BA /* GameScene.sks */; };
@@ -50,7 +49,6 @@
 		6125EBCF1A389073006CC195 /* StartScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = StartScene.sks; sourceTree = "<group>"; };
 		6136E5991A3D71D500BDD163 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
 		615932BE1A3C966A0093B827 /* Social.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Social.framework; path = System/Library/Frameworks/Social.framework; sourceTree = SDKROOT; };
-		616A0A631A4FD3F5009DA467 /* swift.gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = swift.gitignore; sourceTree = SOURCE_ROOT; };
 		618086611A3F0D35004F540A /* iAd.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = iAd.framework; path = System/Library/Frameworks/iAd.framework; sourceTree = SDKROOT; };
 		61A7FD6B1A2F5FDB00F410BA /* PENDREAM.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PENDREAM.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		61A7FD6F1A2F5FDB00F410BA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -132,7 +130,6 @@
 		61A7FD6D1A2F5FDB00F410BA /* PENDREAM */ = {
 			isa = PBXGroup;
 			children = (
-				616A0A631A4FD3F5009DA467 /* swift.gitignore */,
 				61F217D51A4FBD430099AA3D /* BridgeHeader.h */,
 				61A7FD701A2F5FDB00F410BA /* AppDelegate.swift */,
 				61A7FD721A2F5FDB00F410BA /* GameScene.sks */,
@@ -279,7 +276,6 @@
 			files = (
 				61F217C41A4EED3C0099AA3D /* fallingvoice.mp3 in Resources */,
 				61A7FD7F1A2F5FDC00F410BA /* LaunchScreen.xib in Resources */,
-				616A0A641A4FD3F5009DA467 /* swift.gitignore in Resources */,
 				61F217C21A4EED3C0099AA3D /* collision.mp3 in Resources */,
 				61A7FD7C1A2F5FDC00F410BA /* Images.xcassets in Resources */,
 				61A7FD731A2F5FDB00F410BA /* GameScene.sks in Resources */,
