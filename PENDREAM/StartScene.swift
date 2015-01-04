@@ -11,7 +11,6 @@ import SpriteKit
 
 class StartScene: SKScene {
     
-    let titleSprite = SKSpriteNode()
     let startButtonSprite = SKSpriteNode()
     let rankingButtonSprite = SKSpriteNode()
     var touchButtonName: String? = nil
@@ -24,53 +23,32 @@ class StartScene: SKScene {
     override func didMoveToView(view: SKView) {
         
         // setup background
-        let background = SKSpriteNode(imageNamed: "background")
+        let background = SKSpriteNode()
+        alternateTexture(Sprite: background, ImageName1: "top", ImageName2: "top2")
         background.anchorPoint = CGPoint(x: 0, y: 0)
+        background.zPosition = 0
         self.addChild(background)
-        
-        
-        // scessor
-        let scessorSprite = SKSpriteNode(imageNamed: "st_scessor_l")
-        scessorSprite.position = CGPoint(x: 0, y: CGRectGetMaxY(self.frame))
-        scessorSprite.anchorPoint = CGPoint(x: 0, y: 0.6)
-        self.addChild(scessorSprite)
-        
-        // scale
-        let scaleSprite = SKSpriteNode(imageNamed: "st_scale_r")
-        scaleSprite.position = CGPoint(x: CGRectGetMaxX(self.frame), y: CGRectGetMaxY(self.frame))
-        scaleSprite.anchorPoint = CGPoint(x: 0.7, y: 1)
-        self.addChild(scaleSprite)
-        
-        // pen
-        let penSprite = SKSpriteNode(imageNamed: "st_pen_l")
-        penSprite.position = CGPoint(x: 0, y: CGRectGetMidY(self.frame))
-        penSprite.anchorPoint = CGPoint(x: 0.1, y: 0.65)
-        self.addChild(penSprite)
-        
-        // erasorSprite
-        let erasorSprite = SKSpriteNode(imageNamed: "st_erasor_r")
-        erasorSprite.position = CGPoint(x: CGRectGetMaxX(self.frame), y: CGRectGetMidY(self.frame))
-        erasorSprite.anchorPoint = CGPoint(x: 0.9, y: 0.65)
-        self.addChild(erasorSprite)
-        
-        // logo
-        alternateTexture(Sprite: titleSprite, ImageName1: "logo1", ImageName2: "logo2")
-        titleSprite.position = CGPoint(x: CGRectGetMidX(self.frame), y: CGRectGetMidY(self.frame) * 1.32)
-        self.addChild(titleSprite)
         
         // Start Button
         alternateTexture(Sprite: startButtonSprite, ImageName1: "button_start1", ImageName2: "button_start2")
-        startButtonSprite.position = CGPoint(x: CGRectGetMidX(self.frame), y: CGRectGetMidY(self.frame)*13/20)
+        startButtonSprite.position = CGPoint(x: CGRectGetMidX(self.frame), y: CGRectGetMidY(self.frame)/2)
         startButtonSprite.name = "start_button"
         startButtonSprite.zPosition = 2
         self.addChild(startButtonSprite)
         
         // Ranking Button
         alternateTexture(Sprite: rankingButtonSprite, ImageName1: "button_ranking1", ImageName2: "button_ranking2")
-        rankingButtonSprite.position = CGPoint(x: CGRectGetMidX(self.frame), y: CGRectGetMidY(self.frame)*2/5)
+        rankingButtonSprite.position = CGPoint(x: CGRectGetMidX(self.frame), y: CGRectGetMidY(self.frame)/4)
         rankingButtonSprite.name = "ranking_button"
-        startButtonSprite.zPosition = 2
+        rankingButtonSprite.zPosition = 2
         self.addChild(rankingButtonSprite)
+        
+        if CGRectGetHeight(UIScreen.mainScreen().bounds) < 568 {
+            startButtonSprite.position.y = CGRectGetMidY(self.frame)*2/3
+        }
+        if CGRectGetHeight(UIScreen.mainScreen().bounds) < 568 {
+            rankingButtonSprite.position.y = CGRectGetMidY(self.frame)*9/20
+        }
         
         tapSound.prepareSound("tap")
     }

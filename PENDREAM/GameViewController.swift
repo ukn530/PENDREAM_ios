@@ -33,6 +33,7 @@ extension SKNode {
 class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBannerViewDelegate, SKProductsRequestDelegate, SKPaymentTransactionObserver {
     
     let banner = ADBannerView(frame: CGRectZero)
+    //var isTapRestore = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -46,6 +47,7 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBa
         
         authenticateLocalPlayer()
         
+        //if let scene = StartScene.unarchiveFromFile("GameScene") as? StartScene {
         if let scene = StartScene.unarchiveFromFile("GameScene") as? StartScene {
             // Configure the view.
             let skView = self.view as SKView
@@ -103,12 +105,53 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBa
     
     func startInAppPurchase(notification: NSNotification) {
         println("startInAppPurchase")
+        /*
+        let alert = UIAlertController(title: "Confirmation", message: "Have you ever purchased this?", preferredStyle: UIAlertControllerStyle.Alert)
+        alert.addAction(UIAlertAction(title: "Yes", style: UIAlertActionStyle.Default, handler: { action in
+            switch action.style{
+            case .Default:
+                println("default1")
+                
+                let set = NSSet(objects: adProductId)
+                let productsRequest = SKProductsRequest(productIdentifiers: set)
+                productsRequest.delegate = self
+                productsRequest.start()
+                self.isTapRestore = true
+            case .Cancel:
+                println("cancel1")
+                
+            case .Destructive:
+                println("destructive1")
+            }
+        }))
+        alert.addAction(UIAlertAction(title: "No", style: UIAlertActionStyle.Default, handler: { action in
+            switch action.style{
+            case .Default:
+                println("default2")
+                
+                let set = NSSet(objects: adProductId)
+                let productsRequest = SKProductsRequest(productIdentifiers: set)
+                productsRequest.delegate = self
+                productsRequest.start()
+                self.isTapRestore = false
+                
+            case .Cancel:
+                println("cancel2")
+                
+            case .Destructive:
+                println("destructive2")
+            }
+        }))
+        alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler: nil))
+        self.presentViewController(alert, animated: true, completion: nil)
+        */
+        
+        // check if products is in app store
         let set = NSSet(objects: adProductId)
         let productsRequest = SKProductsRequest(productIdentifiers: set)
         productsRequest.delegate = self
         productsRequest.start()
     }
-    
     
     func productsRequest(request: SKProductsRequest!, didReceiveResponse response: SKProductsResponse!) {
         
@@ -118,7 +161,6 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBa
             alert.show()
             return
         }
-        
         SKPaymentQueue.defaultQueue().addTransactionObserver(self)
         
         println("product request response.products")
@@ -128,6 +170,33 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBa
             SKPaymentQueue.defaultQueue().addPayment(payment)
             println("payment Queue")
         }
+        /*
+        
+        if isTapRestore {
+            SKPaymentQueue.defaultQueue().addTransactionObserver(self)
+            SKPaymentQueue.defaultQueue().restoreCompletedTransactions()
+            println("product request response.products")
+            /*
+            println("product request response.products")
+            for product in response.products {
+                println("product.title=\(product.localizedTitle)")
+                let payment = SKPayment(product: product as SKProduct)
+                SKPaymentQueue.defaultQueue().addPayment(payment)
+                println("payment Queue Restore")
+            }
+            */
+        } else {
+            SKPaymentQueue.defaultQueue().addTransactionObserver(self)
+            
+            println("product request response.products")
+            for product in response.products {
+                println("product.title=\(product.localizedTitle)")
+                let payment = SKPayment(product: product as SKProduct)
+                SKPaymentQueue.defaultQueue().addPayment(payment)
+                println("payment Queue")
+            }
+        }
+        */
 
     }
     
@@ -150,7 +219,14 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBa
                 queue.finishTransaction(transaction as SKPaymentTransaction)
             } else if transaction.transactionState == SKPaymentTransactionState.Restored {
                 println("restored")
+                /*
+                let userDefaults = NSUserDefaults.standardUserDefaults()
+                userDefaults.setBool(true, forKey: "isPurchased")
+                banner.removeFromSuperview()
+                NSNotificationCenter.defaultCenter().postNotificationName("purchased", object: nil, userInfo: nil)
                 queue.finishTransaction(transaction as SKPaymentTransaction)
+                isTapRestore = false
+                */
             } else {
                 println("else")
                 queue.finishTransaction(transaction as SKPaymentTransaction)
@@ -164,8 +240,19 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBa
     
     func paymentQueueRestoreCompletedTransactionsFinished(queue: SKPaymentQueue!) {
         println("complete every Restore")
+        
+        for transaction in queue.transactions {
+            // プロダクトIDが一致した場合
+            println("transaction.transactionIdentifier = \(transaction.transactionIdentifier)")
+            /*
+            if transaction.transactionIdentifier == adProductId {
+                println("Im hungry")
+                // *** ここに制限解除や広告削除などの課金後の命令を書く ***
+            }
+            */
+        }
     }
-    
+
     func paymentQueue(queue: SKPaymentQueue!, removedTransactions transactions: [AnyObject]!) {
         println("removedTransactions")
         SKPaymentQueue.defaultQueue().removeTransactionObserver(self)

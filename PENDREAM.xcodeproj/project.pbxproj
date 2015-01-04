@@ -18,7 +18,6 @@
 		61A7FD771A2F5FDB00F410BA /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61A7FD761A2F5FDB00F410BA /* GameViewController.swift */; };
 		61A7FD7A1A2F5FDC00F410BA /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 61A7FD781A2F5FDC00F410BA /* Main.storyboard */; };
 		61A7FD7C1A2F5FDC00F410BA /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 61A7FD7B1A2F5FDC00F410BA /* Images.xcassets */; };
-		61A7FD7F1A2F5FDC00F410BA /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 61A7FD7D1A2F5FDC00F410BA /* LaunchScreen.xib */; };
 		61A7FD8B1A2F5FDC00F410BA /* PENDREAMTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61A7FD8A1A2F5FDC00F410BA /* PENDREAMTests.swift */; };
 		61C125571A407EB100F66ED5 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61C125561A407EB100F66ED5 /* StoreKit.framework */; };
 		61F217C11A4EED3C0099AA3D /* bgm.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 61F217BB1A4EED3C0099AA3D /* bgm.mp3 */; };
@@ -58,7 +57,6 @@
 		61A7FD761A2F5FDB00F410BA /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
 		61A7FD791A2F5FDC00F410BA /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		61A7FD7B1A2F5FDC00F410BA /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
-		61A7FD7E1A2F5FDC00F410BA /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		61A7FD841A2F5FDC00F410BA /* PENDREAMTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PENDREAMTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		61A7FD891A2F5FDC00F410BA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		61A7FD8A1A2F5FDC00F410BA /* PENDREAMTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PENDREAMTests.swift; sourceTree = "<group>"; };
@@ -106,12 +104,6 @@
 		61A7FD621A2F5FDB00F410BA = {
 			isa = PBXGroup;
 			children = (
-				61F217CF1A4FBB790099AA3D /* SystemConfiguration.framework */,
-				61F217C91A4EEE180099AA3D /* AVFoundation.framework */,
-				61C125561A407EB100F66ED5 /* StoreKit.framework */,
-				618086611A3F0D35004F540A /* iAd.framework */,
-				6136E5991A3D71D500BDD163 /* GameKit.framework */,
-				615932BE1A3C966A0093B827 /* Social.framework */,
 				61A7FD6D1A2F5FDB00F410BA /* PENDREAM */,
 				61A7FD871A2F5FDC00F410BA /* PENDREAMTests */,
 				61A7FD6C1A2F5FDB00F410BA /* Products */,
@@ -141,7 +133,6 @@
 				61F217D61A4FBE370099AA3D /* Strings.swift */,
 				61A7FD781A2F5FDC00F410BA /* Main.storyboard */,
 				61A7FD7B1A2F5FDC00F410BA /* Images.xcassets */,
-				61A7FD7D1A2F5FDC00F410BA /* LaunchScreen.xib */,
 				61F217CB1A4FBA500099AA3D /* Flurry */,
 				61A7FD6E1A2F5FDB00F410BA /* Supporting Files */,
 			);
@@ -151,6 +142,12 @@
 		61A7FD6E1A2F5FDB00F410BA /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				61F217CF1A4FBB790099AA3D /* SystemConfiguration.framework */,
+				61F217C91A4EEE180099AA3D /* AVFoundation.framework */,
+				61C125561A407EB100F66ED5 /* StoreKit.framework */,
+				618086611A3F0D35004F540A /* iAd.framework */,
+				6136E5991A3D71D500BDD163 /* GameKit.framework */,
+				615932BE1A3C966A0093B827 /* Social.framework */,
 				61F217BB1A4EED3C0099AA3D /* bgm.mp3 */,
 				61F217BC1A4EED3C0099AA3D /* collision.mp3 */,
 				61F217BD1A4EED3C0099AA3D /* falling.mp3 */,
@@ -275,7 +272,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				61F217C41A4EED3C0099AA3D /* fallingvoice.mp3 in Resources */,
-				61A7FD7F1A2F5FDC00F410BA /* LaunchScreen.xib in Resources */,
 				61F217C21A4EED3C0099AA3D /* collision.mp3 in Resources */,
 				61A7FD7C1A2F5FDC00F410BA /* Images.xcassets in Resources */,
 				61A7FD731A2F5FDB00F410BA /* GameScene.sks in Resources */,
@@ -336,14 +332,6 @@
 				61A7FD791A2F5FDC00F410BA /* Base */,
 			);
 			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
-		61A7FD7D1A2F5FDC00F410BA /* LaunchScreen.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				61A7FD7E1A2F5FDC00F410BA /* Base */,
-			);
-			name = LaunchScreen.xib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -430,10 +418,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = PENDREAM/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -449,10 +438,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = PENDREAM/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",

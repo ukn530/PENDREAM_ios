@@ -5,23 +5,9 @@
       "scale" : "1x"
     },
     {
-      "resizing" : {
-        "mode" : "9-part",
-        "center" : {
-          "mode" : "fill",
-          "width" : 1,
-          "height" : 1
-        },
-        "capInsets" : {
-          "bottom" : 92,
-          "top" : 92,
-          "right" : 151,
-          "left" : 204
-        }
-      },
       "idiom" : "universal",
-      "filename" : "st_pen_r@2x.png",
-      "scale" : "2x"
+      "scale" : "2x",
+      "filename" : "st_pen_r@2x.png"
     },
     {
       "idiom" : "universal",

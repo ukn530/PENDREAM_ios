@@ -7,8 +7,6 @@
 //
 
 import SpriteKit
-//import GameViewController
-
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
@@ -23,8 +21,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let 🐱s = [SKSpriteNode(), SKSpriteNode(), SKSpriteNode(), SKSpriteNode()]
     let obstacleNameArray = ["st_pen_l", "st_pen_r", "st_erasor_l", "st_erasor_r","st_scale_l", "st_scale_r", "st_scessor_l", "st_scessor_r", "fd_banana_l", "fd_banana_r", "fd_bread_l", "fd_bread_r", "fd_chocolate_l", "fd_chocolate_r", "fd_pasta_l", "fd_pasta_r", "an_ant_l", "an_ant_r", "an_cat_l", "an_cat_r", "an_cow_l", "an_cow_r", "an_whale_l", "an_whale_r", "sa_daibutsu_l", "sa_daibutsu_r", "sa_moai_l", "sa_moai_r", "sa_sphinx_l", "sa_sphinx_r", "sa_venus_l", "sa_venus_r", "tw_eiffel_l", "tw_eiffel_r", "tw_empire_l", "tw_empire_r", "tw_sagrada_l", "tw_sagrada_r", "tw_touhoh_l", "tw_touhoh_r"]
     var previousObstacleY = CGFloat(0)
-    let speedObstacle = CGFloat(4)
+    let speedObstacle = CGFloat(3.8)
     var acceration = CGFloat(1)
+    let background = SKSpriteNode(imageNamed: "background")
+    let background2 = SKSpriteNode(imageNamed: "background")
     
     // the framerate of stop motion animetion is 12 frames in a second
     let animationRate = 10
@@ -50,6 +50,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var goY = CGFloat(0)
     let gameoverTitle = SKSpriteNode()
     let board = SKSpriteNode()
+    
     let scoreText = SKSpriteNode(imageNamed: "score")
     let bestText = SKSpriteNode(imageNamed: "best")
     let twButton = SKSpriteNode(imageNamed: "button_twitter")
@@ -67,6 +68,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var gameState = 0
     
     var isPurchased: Bool = false
+    var isHit = false
     
     // sound
     let bgmSound = Sound()
@@ -93,9 +95,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         foldPaperSound.playSound()
         
         // setup background
-        let background = SKSpriteNode(imageNamed: "background")
+        
         background.anchorPoint = CGPoint(x: 0, y: 0)
+        background.zPosition = 0
         self.addChild(background)
+        
+        background2.anchorPoint = CGPoint(x: 0, y: 0)
+        background.zPosition = 0
+        background2.position = CGPoint(x: 0, y: -background.size.height)
+        self.addChild(background2)
+        
+        isHit = false
         
         // setup collision
         self.physicsWorld.contactDelegate = self
@@ -130,7 +140,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         NSNotificationCenter.defaultCenter().postNotificationName("getPlay", object: nil, userInfo: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "purchased:", name: "purchased", object: nil)
-
     }
     
     
@@ -163,6 +172,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // swing 🐧
         🐧.zRotation = CGFloat(sin(radian) * M_PI / 20)
         🐧.position = CGPoint(x: CGRectGetMidX(self.frame) + CGFloat(sin(radian)) * CGRectGetMidX(self.frame) * 4 / 5, y: 🐧.position.y)
+        🐧.zPosition = 2
         
         if isOpenUmbrella {
             radian += M_PI / 50
@@ -184,7 +194,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             if isOpenUmbrella {
                 acceration = 1
             } else {
-                if acceration < 4 {
+                if acceration < speedObstacle {
                     acceration *= 1.03
                 }
             }
@@ -209,6 +219,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 isCountable = false
                 resetScore(spriteArray: counterSmallSpriteArray, left: true, score: score)
                 println("score = \(score)")
+            }
+            
+            
+            background.position.y += speedObstacle * acceration * 0.999
+            background2.position.y += speedObstacle * acceration * 0.999
+            
+            if background.position.y > background.size.height {
+                background.position.y = background2.position.y - background.size.height
+            }
+            
+            if background2.position.y > background2.size.height {
+                background2.position.y = background.position.y - background2.size.height
             }
         }
     }
@@ -337,13 +359,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         🐱.size = tex.size()
         🐱.zRotation = 0
         🐱.name = name
-        🐱.zPosition = 0
+        🐱.zPosition = 1
         
         if rand%2 == 0 {
             🐱.position = CGPoint(x:0, y:previousObstacleY - 🐱.size.height - 🐧.size.height)
             🐱.anchorPoint = CGPoint(x:0, y:0)
         } else {
-            🐱.position = CGPoint(x:CGRectGetMaxX(self.frame), y:previousObstacleY - 🐱.size.height - 🐧.size.height)
+            🐱.position = CGPoint(x:CGRectGetMaxX(self.frame), y:previousObstacleY - 🐱.size.height - 🐧.size.height*0.9)
             🐱.anchorPoint = CGPoint(x:1.0, y:0)
         }
         
@@ -606,6 +628,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                         NSNotificationCenter.defaultCenter().postNotificationName("getPlay", object: nil, userInfo: nil)
                         resetGame()
                         bgmSound.playSound()
+                        isHit = false
                         Flurry.logEvent("TapStartInGameScene")
                     } else if (touchButtonName == "ranking_button") {
                         showScore()
@@ -644,45 +667,56 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     
     func didBeginContact(contact: SKPhysicsContact!) {
-        collisionSound.playSound()
-        bgmSound.stopSound()
-        
-        gameState = GAME_OVER
-        
-        for 🐱 in 🐱s {
-            🐱.physicsBody = nil
-        }
-        🐧.physicsBody = nil
-        
-        let userDefaults = NSUserDefaults.standardUserDefaults()
-        var playTimes: Int = userDefaults.integerForKey("playTimes")
-        playTimes++
-        userDefaults.setObject(playTimes, forKey: "playTimes")
-        bestScore = userDefaults.integerForKey("bestScore")
-        if bestScore < score {
-            userDefaults.setObject(score, forKey: "bestScore")
-            bestScore = score
+        if !isHit {
             
-            // send score to Game Center
-            sendScore()
+            collisionSound.playSound()
+            bgmSound.stopSound()
+            
+            gameState = GAME_OVER
+            
+            for 🐱 in 🐱s {
+                🐱.physicsBody = nil
+            }
+            🐧.physicsBody = nil
+            
+            let userDefaults = NSUserDefaults.standardUserDefaults()
+            var playTimes: Int = userDefaults.integerForKey("playTimes")
+            playTimes++
+            userDefaults.setObject(playTimes, forKey: "playTimes")
+            bestScore = userDefaults.integerForKey("bestScore")
+            if bestScore < score {
+                userDefaults.setObject(score, forKey: "bestScore")
+                bestScore = score
+                
+                // send score to Game Center
+                sendScore()
+            }
+            println("playTimes = \(playTimes)")
+            //Send to Flurry for Analytics
+            var scoreDictionary: [String: Int] = ["playTime": userDefaults.integerForKey("playTimes"), "score": score, "bestScore": bestScore]
+            Flurry.logEvent("gameOver", withParameters: scoreDictionary, timed: true)
+            
+            for num in counterSmallSpriteArray {
+                num.texture = nil
+            }
+            
+            resetScore(spriteArray: scoreSpriteArray, left: false, score: score)
+            resetScore(spriteArray: bestSpriteArray, left: false, score: bestScore)
+            
+            NSNotificationCenter.defaultCenter().postNotificationName("getOver", object: nil, userInfo: nil)
+            
+            isHit = true
         }
-        println("playTimes = \(playTimes)")
-        //Send to Flurry for Analytics
-        var scoreDictionary: [String: Int] = ["playTime": userDefaults.integerForKey("playTimes"), "score": score, "bestScore": bestScore]
-        Flurry.logEvent("gameOver", withParameters: scoreDictionary, timed: true)
-        
-        for num in counterSmallSpriteArray {
-            num.texture = nil
-        }
-        
-        resetScore(spriteArray: scoreSpriteArray, left: false, score: score)
-        resetScore(spriteArray: bestSpriteArray, left: false, score: bestScore)
-        
-        NSNotificationCenter.defaultCenter().postNotificationName("getOver", object: nil, userInfo: nil)
     }
     
     func shareSNS(sns:String){
-        let message = "You got \(score) points in PEN DREAM. (-o-)"
+        
+        var message = String()
+        if sns == "twitter" {
+            message = "(-o-) < You got \(score) points in PEN DREAM. @PenPenDream"
+        } else {
+            message = "(-o-) < You got \(score) points in PEN DREAM."
+        }
         let userInfo = ["sns": sns.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: true)!, "image": captureGameScreen(), "message": message.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: true)!]
         
         NSNotificationCenter.defaultCenter().postNotificationName("sns", object: nil, userInfo: userInfo)
@@ -740,377 +774,378 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let height = sprite.size.height
         let offsetX = sprite.size.width * sprite.anchorPoint.x
         let offsetY = sprite.size.height  * sprite.anchorPoint.y
+        var adjust: CGFloat = 1
         
         let path = CGPathCreateMutable()
         
         if sprite == 🐧 {
             if isOpenUmbrella {
-                CGPathMoveToPoint(path, nil, 32 - offsetX, 115 - offsetY)
-                CGPathAddLineToPoint(path, nil, 5 - offsetX, 90 - offsetY)
-                CGPathAddLineToPoint(path, nil, 17 - offsetX, 94 - offsetY)
-                CGPathAddLineToPoint(path, nil, 33 - offsetX, 5 - offsetY)
-                CGPathAddLineToPoint(path, nil, 58 - offsetX, 5 - offsetY)
-                CGPathAddLineToPoint(path, nil, 75 - offsetX, 20 - offsetY)
-                CGPathAddLineToPoint(path, nil, 75 - offsetX, 20 - offsetY)
-                CGPathAddLineToPoint(path, nil, 58 - offsetX, 85 - offsetY)
+                CGPathMoveToPoint(path, nil, 32 * adjust - offsetX, 115 * adjust - offsetY)
+                CGPathAddLineToPoint(path, nil, 5 * adjust - offsetX, 90 * adjust - offsetY)
+                CGPathAddLineToPoint(path, nil, 17 * adjust - offsetX, 94 * adjust - offsetY)
+                CGPathAddLineToPoint(path, nil, 33 * adjust - offsetX, 5 * adjust - offsetY)
+                CGPathAddLineToPoint(path, nil, 58 * adjust - offsetX, 5 * adjust - offsetY)
+                CGPathAddLineToPoint(path, nil, 75 * adjust - offsetX, 20 * adjust - offsetY)
+                CGPathAddLineToPoint(path, nil, 75 * adjust - offsetX, 20 * adjust - offsetY)
+                CGPathAddLineToPoint(path, nil, 58 * adjust - offsetX, 85 * adjust - offsetY)
             } else {
-                CGPathMoveToPoint(path, nil, 32 - offsetX, 115 - offsetY)
-                CGPathAddLineToPoint(path, nil, 18 - offsetX, 70 - offsetY)
-                CGPathAddLineToPoint(path, nil, 33 - offsetX, 5 - offsetY)
-                CGPathAddLineToPoint(path, nil, 58 - offsetX, 5 - offsetY)
-                CGPathAddLineToPoint(path, nil, 75 - offsetX, 20 - offsetY)
-                CGPathAddLineToPoint(path, nil, 75 - offsetX, 20 - offsetY)
-                CGPathAddLineToPoint(path, nil, 58 - offsetX, 85 - offsetY)
+                CGPathMoveToPoint(path, nil, 32 * adjust - offsetX, 115 * adjust - offsetY)
+                CGPathAddLineToPoint(path, nil, 18 * adjust - offsetX, 70 * adjust - offsetY)
+                CGPathAddLineToPoint(path, nil, 33 * adjust - offsetX, 5 * adjust - offsetY)
+                CGPathAddLineToPoint(path, nil, 58 * adjust - offsetX, 5 * adjust - offsetY)
+                CGPathAddLineToPoint(path, nil, 75 * adjust - offsetX, 20 * adjust - offsetY)
+                CGPathAddLineToPoint(path, nil, 75 * adjust - offsetX, 20 * adjust - offsetY)
+                CGPathAddLineToPoint(path, nil, 58 * adjust - offsetX, 85 * adjust - offsetY)
             }
         }
         
         if sprite.name == "st_pen_l" {
-            CGPathMoveToPoint(path, nil, 0 - offsetX, 97 - offsetY)
-            CGPathAddLineToPoint(path, nil, 165 - offsetX, 22 - offsetY)
-            CGPathAddLineToPoint(path, nil, 187 - offsetX, 5 - offsetY)
-            CGPathAddLineToPoint(path, nil, 160 - offsetX, 8 - offsetY)
-            CGPathAddLineToPoint(path, nil, 0 - offsetX, 80 - offsetY)
+            CGPathMoveToPoint(path, nil, 0 * adjust - offsetX, 97 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 165 * adjust - offsetX, 22 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 187 * adjust - offsetX, 5 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 160 * adjust - offsetX, 8 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 0 * adjust - offsetX, 80 * adjust - offsetY)
         } else if sprite.name == "st_pen_r" {
-            CGPathMoveToPoint(path, nil, 178 - offsetX, 87 - offsetY)
-            CGPathAddLineToPoint(path, nil, 178 - offsetX, 71 - offsetY)
-            CGPathAddLineToPoint(path, nil, 0 - offsetX, 10 - offsetY)
-            CGPathAddLineToPoint(path, nil, 23 - offsetX, 28 - offsetY)
+            CGPathMoveToPoint(path, nil, 178 * adjust - offsetX, 87 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 178 * adjust - offsetX, 71 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 0 * adjust - offsetX, 10 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 23 * adjust - offsetX, 28 * adjust - offsetY)
         } else if sprite.name == "st_erasor_l" {
-            CGPathMoveToPoint(path, nil, 0 - offsetX, 120 - offsetY)
-            CGPathAddLineToPoint(path, nil, 120 - offsetX, 68 - offsetY)
-            CGPathAddLineToPoint(path, nil, 134 - offsetX, 43 - offsetY)
-            CGPathAddLineToPoint(path, nil, 100 - offsetX, 4 - offsetY)
-            CGPathAddLineToPoint(path, nil, 0 - offsetX, 37 - offsetY)
+            CGPathMoveToPoint(path, nil, 0 * adjust - offsetX, 120 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 120 * adjust - offsetX, 68 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 134 * adjust - offsetX, 43 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 100 * adjust - offsetX, 4 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 0 * adjust - offsetX, 37 * adjust - offsetY)
         } else if sprite.name == "st_erasor_r" {
-            CGPathMoveToPoint(path, nil, 126 - offsetX, 120 - offsetY)
-            CGPathAddLineToPoint(path, nil, 10 - offsetX, 68 - offsetY)
-            CGPathAddLineToPoint(path, nil, 6 - offsetX, 28 - offsetY)
-            CGPathAddLineToPoint(path, nil, 28 - offsetX, 5 - offsetY)
-            CGPathAddLineToPoint(path, nil, 126 - offsetX, 46 - offsetY)
+            CGPathMoveToPoint(path, nil, 126 * adjust - offsetX, 120 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 10 * adjust - offsetX, 68 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 6 * adjust - offsetX, 28 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 28 * adjust - offsetX, 5 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 126 * adjust - offsetX, 46 * adjust - offsetY)
         } else if sprite.name == "st_scale_l" {
-            CGPathMoveToPoint(path, nil, 0 - offsetX, 111 - offsetY)
-            CGPathAddLineToPoint(path, nil, 200 - offsetX, 46 - offsetY)
-            CGPathAddLineToPoint(path, nil, 192 - offsetX, 5 - offsetY)
-            CGPathAddLineToPoint(path, nil, 0 - offsetX, 65 - offsetY)
+            CGPathMoveToPoint(path, nil, 0 * adjust - offsetX, 111 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 200 * adjust - offsetX, 46 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 192 * adjust - offsetX, 5 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 0 * adjust - offsetX, 65 * adjust - offsetY)
         } else if sprite.name == "st_scale_r" {
-            CGPathMoveToPoint(path, nil, 196 - offsetX, 108 - offsetY)
-            CGPathAddLineToPoint(path, nil, 196 - offsetX, 65 - offsetY)
-            CGPathAddLineToPoint(path, nil, 18 - offsetX, 3 - offsetY)
-            CGPathAddLineToPoint(path, nil, 5 - offsetX, 44 - offsetY)
+            CGPathMoveToPoint(path, nil, 196 * adjust - offsetX, 108 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 196 * adjust - offsetX, 65 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 18 * adjust - offsetX, 3 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 5 * adjust - offsetX, 44 * adjust - offsetY)
         } else if sprite.name == "st_scessor_l" {
-            CGPathMoveToPoint(path, nil, 1 - offsetX, 181 - offsetY)
-            CGPathAddLineToPoint(path, nil, 20 - offsetX, 167 - offsetY)
-            CGPathAddLineToPoint(path, nil, 25 - offsetX, 144 - offsetY)
-            CGPathAddLineToPoint(path, nil, 47 - offsetX, 99 - offsetY)
-            CGPathAddLineToPoint(path, nil, 181 - offsetX, 95 - offsetY)
-            CGPathAddLineToPoint(path, nil, 187 - offsetX, 88 - offsetY)
-            CGPathAddLineToPoint(path, nil, 73 - offsetX, 80 - offsetY)
-            CGPathAddLineToPoint(path, nil, 156 - offsetX, 9 - offsetY)
-            CGPathAddLineToPoint(path, nil, 151 - offsetX, 2 - offsetY)
-            CGPathAddLineToPoint(path, nil, 1 - offsetX, 56 - offsetY)
+            CGPathMoveToPoint(path, nil, 1 * adjust - offsetX, 181 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 20 * adjust - offsetX, 167 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 25 * adjust - offsetX, 144 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 47 * adjust - offsetX, 99 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 181 * adjust - offsetX, 95 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 187 * adjust - offsetX, 88 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 73 * adjust - offsetX, 80 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 156 * adjust - offsetX, 9 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 151 * adjust - offsetX, 2 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 1 * adjust - offsetX, 56 * adjust - offsetY)
         } else if sprite.name == "st_scessor_r" {
-            CGPathMoveToPoint(path, nil, 211 - offsetX, 190 - offsetY)
-            CGPathAddLineToPoint(path, nil, 155 - offsetX, 150 - offsetY)
-            CGPathAddLineToPoint(path, nil, 135 - offsetX, 107 - offsetY)
-            CGPathAddLineToPoint(path, nil, 9 - offsetX, 95 - offsetY)
-            CGPathAddLineToPoint(path, nil, 40 - offsetX, 7 - offsetY)
-            CGPathAddLineToPoint(path, nil, 40 - offsetX, 7 - offsetY)
-            CGPathAddLineToPoint(path, nil, 211 - offsetX, 60 - offsetY)
+            CGPathMoveToPoint(path, nil, 211 * adjust - offsetX, 190 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 155 * adjust - offsetX, 150 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 135 * adjust - offsetX, 107 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 9 * adjust - offsetX, 95 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 40 * adjust - offsetX, 7 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 40 * adjust - offsetX, 7 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 211 * adjust - offsetX, 60 * adjust - offsetY)
         } else if sprite.name == "fd_banana_l" {
-            CGPathMoveToPoint(path, nil, 16 - offsetX, 174 - offsetY)
-            CGPathAddLineToPoint(path, nil, 27 - offsetX, 163 - offsetY)
-            CGPathAddLineToPoint(path, nil, 21 - offsetX, 135 - offsetY)
-            CGPathAddLineToPoint(path, nil, 39 - offsetX, 95 - offsetY)
-            CGPathAddLineToPoint(path, nil, 69 - offsetX, 69 - offsetY)
-            CGPathAddLineToPoint(path, nil, 120 - offsetX, 57 - offsetY)
-            CGPathAddLineToPoint(path, nil, 180 - offsetX, 65 - offsetY)
-            CGPathAddLineToPoint(path, nil, 189 - offsetX, 48 - offsetY)
-            CGPathAddLineToPoint(path, nil, 170 - offsetX, 21 - offsetY)
-            CGPathAddLineToPoint(path, nil, 107 - offsetX, 5 - offsetY)
-            CGPathAddLineToPoint(path, nil, 38 - offsetX, 22 - offsetY)
-            CGPathAddLineToPoint(path, nil, 1 - offsetX, 61 - offsetY)
-            CGPathAddLineToPoint(path, nil, 1 - offsetX, 136 - offsetY)
+            CGPathMoveToPoint(path, nil, 16 * adjust - offsetX, 174 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 27 * adjust - offsetX, 163 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 21 * adjust - offsetX, 135 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 39 * adjust - offsetX, 95 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 69 * adjust - offsetX, 69 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 120 * adjust - offsetX, 57 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 180 * adjust - offsetX, 65 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 189 * adjust - offsetX, 48 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 170 * adjust - offsetX, 21 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 107 * adjust - offsetX, 5 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 38 * adjust - offsetX, 22 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 1 * adjust - offsetX, 61 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 1 * adjust - offsetX, 136 * adjust - offsetY)
         } else if sprite.name == "fd_banana_r" {
-            CGPathMoveToPoint(path, nil, 199 - offsetX, 125 - offsetY)
-            CGPathAddLineToPoint(path, nil, 198 - offsetX, 67 - offsetY)
-            CGPathAddLineToPoint(path, nil, 87 - offsetX, 1 - offsetY)
-            CGPathAddLineToPoint(path, nil, 25 - offsetX, 16 - offsetY)
-            CGPathAddLineToPoint(path, nil, 4 - offsetX, 46 - offsetY)
-            CGPathAddLineToPoint(path, nil, 4 - offsetX, 52 - offsetY)
-            CGPathAddLineToPoint(path, nil, 13 - offsetX, 62 - offsetY)
-            CGPathAddLineToPoint(path, nil, 88 - offsetX, 58 - offsetY)
-            CGPathAddLineToPoint(path, nil, 122 - offsetX, 67 - offsetY)
-            CGPathAddLineToPoint(path, nil, 159 - offsetX, 103 - offsetY)
-            CGPathAddLineToPoint(path, nil, 173 - offsetX, 141 - offsetY)
-            CGPathAddLineToPoint(path, nil, 166 - offsetX, 156 - offsetY)
-            CGPathAddLineToPoint(path, nil, 178 - offsetX, 174 - offsetY)
-            CGPathAddLineToPoint(path, nil, 189 - offsetX, 157 - offsetY)
-            CGPathAddLineToPoint(path, nil, 198 - offsetX, 124 - offsetY)
+            CGPathMoveToPoint(path, nil, 199 * adjust - offsetX, 125 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 198 * adjust - offsetX, 67 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 87 * adjust - offsetX, 1 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 25 * adjust - offsetX, 16 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 4 * adjust - offsetX, 46 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 4 * adjust - offsetX, 52 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 13 * adjust - offsetX, 62 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 88 * adjust - offsetX, 58 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 122 * adjust - offsetX, 67 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 159 * adjust - offsetX, 103 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 173 * adjust - offsetX, 141 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 166 * adjust - offsetX, 156 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 178 * adjust - offsetX, 174 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 189 * adjust - offsetX, 157 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 198 * adjust - offsetX, 124 * adjust - offsetY)
         } else if sprite.name == "fd_bread_l" {
-            CGPathMoveToPoint(path, nil, 0 - offsetX, 124 - offsetY)
-            CGPathAddLineToPoint(path, nil, 93 - offsetX, 94 - offsetY)
-            CGPathAddLineToPoint(path, nil, 179 - offsetX, 41 - offsetY)
-            CGPathAddLineToPoint(path, nil, 181 - offsetX, 7 - offsetY)
-            CGPathAddLineToPoint(path, nil, 147 - offsetX, 2 - offsetY)
-            CGPathAddLineToPoint(path, nil, 1 - offsetX, 56 - offsetY)
+            CGPathMoveToPoint(path, nil, 0 * adjust - offsetX, 124 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 93 * adjust - offsetX, 94 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 179 * adjust - offsetX, 41 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 181 * adjust - offsetX, 7 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 147 * adjust - offsetX, 2 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 1 * adjust - offsetX, 56 * adjust - offsetY)
         } else if sprite.name == "fd_bread_r" {
-            CGPathMoveToPoint(path, nil, 192 - offsetX, 124 - offsetY)
-            CGPathAddLineToPoint(path, nil, 16 - offsetX, 50 - offsetY)
-            CGPathAddLineToPoint(path, nil, 4 - offsetX, 19 - offsetY)
-            CGPathAddLineToPoint(path, nil, 11 - offsetX, 6 - offsetY)
-            CGPathAddLineToPoint(path, nil, 42 - offsetX, 2 - offsetY)
-            CGPathAddLineToPoint(path, nil, 193 - offsetX, 60 - offsetY)
+            CGPathMoveToPoint(path, nil, 192 * adjust - offsetX, 124 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 16 * adjust - offsetX, 50 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 4 * adjust - offsetX, 19 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 11 * adjust - offsetX, 6 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 42 * adjust - offsetX, 2 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 193 * adjust - offsetX, 60 * adjust - offsetY)
         } else if sprite.name == "fd_chocolate_l" {
-            CGPathMoveToPoint(path, nil, 2 - offsetX, 159 - offsetY)
-            CGPathAddLineToPoint(path, nil, 182 - offsetX, 99 - offsetY)
-            CGPathAddLineToPoint(path, nil, 147 - offsetX, 3 - offsetY)
-            CGPathAddLineToPoint(path, nil, 1 - offsetX, 49 - offsetY)
+            CGPathMoveToPoint(path, nil, 2 * adjust - offsetX, 159 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 182 * adjust - offsetX, 99 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 147 * adjust - offsetX, 3 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 1 * adjust - offsetX, 49 * adjust - offsetY)
         } else if sprite.name == "fd_chocolate_r" {
-            CGPathMoveToPoint(path, nil, 187 - offsetX, 159 - offsetY)
-            CGPathAddLineToPoint(path, nil, 3 - offsetX, 96 - offsetY)
-            CGPathAddLineToPoint(path, nil, 36 - offsetX, 3 - offsetY)
-            CGPathAddLineToPoint(path, nil, 186 - offsetX, 49 - offsetY)
+            CGPathMoveToPoint(path, nil, 187 * adjust - offsetX, 159 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 3 * adjust - offsetX, 96 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 36 * adjust - offsetX, 3 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 186 * adjust - offsetX, 49 * adjust - offsetY)
         } else if sprite.name == "fd_pasta_l" {
-            CGPathMoveToPoint(path, nil, 2 - offsetX, 171 - offsetY)
-            CGPathAddLineToPoint(path, nil, 169 - offsetX, 77 - offsetY)
-            CGPathAddLineToPoint(path, nil, 139 - offsetX, 28 - offsetY)
-            CGPathAddLineToPoint(path, nil, 79 - offsetX, 5 - offsetY)
-            CGPathAddLineToPoint(path, nil, 2 - offsetX, 67 - offsetY)
+            CGPathMoveToPoint(path, nil, 2 * adjust - offsetX, 171 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 169 * adjust - offsetX, 77 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 139 * adjust - offsetX, 28 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 79 * adjust - offsetX, 5 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 2 * adjust - offsetX, 67 * adjust - offsetY)
         } else if sprite.name == "fd_pasta_r" {
-            CGPathMoveToPoint(path, nil, 180 - offsetX, 167 - offsetY)
-            CGPathAddLineToPoint(path, nil, 162 - offsetX, 171 - offsetY)
-            CGPathAddLineToPoint(path, nil, 3 - offsetX, 78 - offsetY)
-            CGPathAddLineToPoint(path, nil, 30 - offsetX, 28 - offsetY)
-            CGPathAddLineToPoint(path, nil, 91 - offsetX, 5 - offsetY)
-            CGPathAddLineToPoint(path, nil, 178 - offsetX, 71 - offsetY)
+            CGPathMoveToPoint(path, nil, 180 * adjust - offsetX, 167 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 162 * adjust - offsetX, 171 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 3 * adjust - offsetX, 78 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 30 * adjust - offsetX, 28 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 91 * adjust - offsetX, 5 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 178 * adjust - offsetX, 71 * adjust - offsetY)
         } else if sprite.name == "an_ant_l" {
-            CGPathMoveToPoint(path, nil, 5 - offsetX, 69 - offsetY)
-            CGPathAddLineToPoint(path, nil, 108 - offsetX, 17 - offsetY)
-            CGPathAddLineToPoint(path, nil, 102 - offsetX, 7 - offsetY)
-            CGPathAddLineToPoint(path, nil, 2 - offsetX, 53 - offsetY)
+            CGPathMoveToPoint(path, nil, 5 * adjust - offsetX, 69 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 108 * adjust - offsetX, 17 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 102 * adjust - offsetX, 7 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 2 * adjust - offsetX, 53 * adjust - offsetY)
         } else if sprite.name == "an_ant_r" {
-            CGPathMoveToPoint(path, nil, 109 - offsetX, 71 - offsetY)
-            CGPathAddLineToPoint(path, nil, 6 - offsetX, 19 - offsetY)
-            CGPathAddLineToPoint(path, nil, 11 - offsetX, 9 - offsetY)
-            CGPathAddLineToPoint(path, nil, 111 - offsetX, 55 - offsetY)
+            CGPathMoveToPoint(path, nil, 109 * adjust - offsetX, 71 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 6 * adjust - offsetX, 19 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 11 * adjust - offsetX, 9 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 111 * adjust - offsetX, 55 * adjust - offsetY)
         } else if sprite.name == "an_cat_l" {
-            CGPathMoveToPoint(path, nil, 3 - offsetX, 106 - offsetY)
-            CGPathAddLineToPoint(path, nil, 41 - offsetX, 129 - offsetY)
-            CGPathAddLineToPoint(path, nil, 87 - offsetX, 89 - offsetY)
-            CGPathAddLineToPoint(path, nil, 119 - offsetX, 46 - offsetY)
-            CGPathAddLineToPoint(path, nil, 147 - offsetX, 24 - offsetY)
-            CGPathAddLineToPoint(path, nil, 153 - offsetX, 11 - offsetY)
-            CGPathAddLineToPoint(path, nil, 2 - offsetX, 6 - offsetY)
+            CGPathMoveToPoint(path, nil, 3 * adjust - offsetX, 106 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 41 * adjust - offsetX, 129 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 87 * adjust - offsetX, 89 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 119 * adjust - offsetX, 46 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 147 * adjust - offsetX, 24 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 153 * adjust - offsetX, 11 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 2 * adjust - offsetX, 6 * adjust - offsetY)
         } else if sprite.name == "an_cat_r" {
-            CGPathMoveToPoint(path, nil, 73 - offsetX, 89 - offsetY)
-            CGPathAddLineToPoint(path, nil, 109 - offsetX, 129 - offsetY)
-            CGPathAddLineToPoint(path, nil, 145 - offsetX, 122 - offsetY)
-            CGPathAddLineToPoint(path, nil, 162 - offsetX, 97 - offsetY)
-            CGPathAddLineToPoint(path, nil, 163 - offsetX, 15 - offsetY)
-            CGPathAddLineToPoint(path, nil, 145 - offsetX, 3 - offsetY)
-            CGPathAddLineToPoint(path, nil, 5 - offsetX, 11 - offsetY)
-            CGPathAddLineToPoint(path, nil, 5 - offsetX, 18 - offsetY)
-            CGPathAddLineToPoint(path, nil, 92 - offsetX, 116 - offsetY)
+            CGPathMoveToPoint(path, nil, 73 * adjust - offsetX, 89 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 109 * adjust - offsetX, 129 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 145 * adjust - offsetX, 122 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 162 * adjust - offsetX, 97 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 163 * adjust - offsetX, 15 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 145 * adjust - offsetX, 3 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 5 * adjust - offsetX, 11 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 5 * adjust - offsetX, 18 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 92 * adjust - offsetX, 116 * adjust - offsetY)
         } else if sprite.name == "an_cow_l" {
-            CGPathMoveToPoint(path, nil, 2 - offsetX, 117 - offsetY)
-            CGPathAddLineToPoint(path, nil, 144 - offsetX, 118 - offsetY)
-            CGPathAddLineToPoint(path, nil, 164 - offsetX, 107 - offsetY)
-            CGPathAddLineToPoint(path, nil, 151 - offsetX, 75 - offsetY)
-            CGPathAddLineToPoint(path, nil, 131 - offsetX, 75 - offsetY)
-            CGPathAddLineToPoint(path, nil, 108 - offsetX, 5 - offsetY)
-            CGPathAddLineToPoint(path, nil, 2 - offsetX, 7 - offsetY)
+            CGPathMoveToPoint(path, nil, 2 * adjust - offsetX, 117 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 144 * adjust - offsetX, 118 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 164 * adjust - offsetX, 107 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 151 * adjust - offsetX, 75 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 131 * adjust - offsetX, 75 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 108 * adjust - offsetX, 5 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 2 * adjust - offsetX, 7 * adjust - offsetY)
         } else if sprite.name == "an_cow_r" {
-            CGPathMoveToPoint(path, nil, 169 - offsetX, 114 - offsetY)
-            CGPathAddLineToPoint(path, nil, 171 - offsetX, 5 - offsetY)
-            CGPathAddLineToPoint(path, nil, 59 - offsetX, 5 - offsetY)
-            CGPathAddLineToPoint(path, nil, 60 - offsetX, 45 - offsetY)
-            CGPathAddLineToPoint(path, nil, 15 - offsetX, 76 - offsetY)
-            CGPathAddLineToPoint(path, nil, 5 - offsetX, 106 - offsetY)
-            CGPathAddLineToPoint(path, nil, 28 - offsetX, 114 - offsetY)
+            CGPathMoveToPoint(path, nil, 169 * adjust - offsetX, 114 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 171 * adjust - offsetX, 5 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 59 * adjust - offsetX, 5 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 60 * adjust - offsetX, 45 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 15 * adjust - offsetX, 76 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 5 * adjust - offsetX, 106 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 28 * adjust - offsetX, 114 * adjust - offsetY)
         } else if sprite.name == "an_whale_l" {
-            CGPathMoveToPoint(path, nil, 1 - offsetX, 125 - offsetY)
-            CGPathAddLineToPoint(path, nil, 173 - offsetX, 69 - offsetY)
-            CGPathAddLineToPoint(path, nil, 223 - offsetX, 7 - offsetY)
-            CGPathAddLineToPoint(path, nil, 161 - offsetX, 3 - offsetY)
-            CGPathAddLineToPoint(path, nil, 89 - offsetX, 34 - offsetY)
-            CGPathAddLineToPoint(path, nil, 59 - offsetX, 32 - offsetY)
-            CGPathAddLineToPoint(path, nil, 67 - offsetX, 48 - offsetY)
-            CGPathAddLineToPoint(path, nil, 2 - offsetX, 86 - offsetY)
+            CGPathMoveToPoint(path, nil, 1 * adjust - offsetX, 125 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 173 * adjust - offsetX, 69 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 223 * adjust - offsetX, 7 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 161 * adjust - offsetX, 3 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 89 * adjust - offsetX, 34 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 59 * adjust - offsetX, 32 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 67 * adjust - offsetX, 48 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 2 * adjust - offsetX, 86 * adjust - offsetY)
         } else if sprite.name == "an_whale_r" {
-            CGPathMoveToPoint(path, nil, 214 - offsetX, 121 - offsetY)
-            CGPathAddLineToPoint(path, nil, 58 - offsetX, 73 - offsetY)
-            CGPathAddLineToPoint(path, nil, 2 - offsetX, 7 - offsetY)
-            CGPathAddLineToPoint(path, nil, 7 - offsetX, 5 - offsetY)
-            CGPathAddLineToPoint(path, nil, 66 - offsetX, 5 - offsetY)
-            CGPathAddLineToPoint(path, nil, 138 - offsetX, 32 - offsetY)
-            CGPathAddLineToPoint(path, nil, 169 - offsetX, 31 - offsetY)
-            CGPathAddLineToPoint(path, nil, 162 - offsetX, 44 - offsetY)
-            CGPathAddLineToPoint(path, nil, 213 - offsetX, 80 - offsetY)
+            CGPathMoveToPoint(path, nil, 214 * adjust - offsetX, 121 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 58 * adjust - offsetX, 73 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 2 * adjust - offsetX, 7 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 7 * adjust - offsetX, 5 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 66 * adjust - offsetX, 5 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 138 * adjust - offsetX, 32 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 169 * adjust - offsetX, 31 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 162 * adjust - offsetX, 44 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 213 * adjust - offsetX, 80 * adjust - offsetY)
         } else if sprite.name == "sa_daibutsu_l" {
-            CGPathMoveToPoint(path, nil, 2 - offsetX, 35 - offsetY)
-            CGPathAddLineToPoint(path, nil, 28 - offsetX, 35 - offsetY)
-            CGPathAddLineToPoint(path, nil, 27 - offsetX, 88 - offsetY)
-            CGPathAddLineToPoint(path, nil, 64 - offsetX, 112 - offsetY)
-            CGPathAddLineToPoint(path, nil, 64 - offsetX, 157 - offsetY)
-            CGPathAddLineToPoint(path, nil, 97 - offsetX, 157 - offsetY)
-            CGPathAddLineToPoint(path, nil, 100 - offsetX, 112 - offsetY)
-            CGPathAddLineToPoint(path, nil, 134 - offsetX, 93 - offsetY)
-            CGPathAddLineToPoint(path, nil, 140 - offsetX, 36 - offsetY)
-            CGPathAddLineToPoint(path, nil, 170 - offsetX, 27 - offsetY)
-            CGPathAddLineToPoint(path, nil, 174 - offsetX, 4 - offsetY)
-            CGPathAddLineToPoint(path, nil, 2 - offsetX, 3 - offsetY)
+            CGPathMoveToPoint(path, nil, 2 * adjust - offsetX, 35 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 28 * adjust - offsetX, 35 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 27 * adjust - offsetX, 88 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 64 * adjust - offsetX, 112 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 64 * adjust - offsetX, 157 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 97 * adjust - offsetX, 157 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 100 * adjust - offsetX, 112 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 134 * adjust - offsetX, 93 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 140 * adjust - offsetX, 36 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 170 * adjust - offsetX, 27 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 174 * adjust - offsetX, 4 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 2 * adjust - offsetX, 3 * adjust - offsetY)
         } else if sprite.name == "sa_daibutsu_r" {
-            CGPathMoveToPoint(path, nil, 184 - offsetX, 31 - offsetY)
-            CGPathAddLineToPoint(path, nil, 184 - offsetX, 7 - offsetY)
-            CGPathAddLineToPoint(path, nil, 7 - offsetX, 2 - offsetY)
-            CGPathAddLineToPoint(path, nil, 23 - offsetX, 35 - offsetY)
-            CGPathAddLineToPoint(path, nil, 41 - offsetX, 35 - offsetY)
-            CGPathAddLineToPoint(path, nil, 45 - offsetX, 91 - offsetY)
-            CGPathAddLineToPoint(path, nil, 76 - offsetX, 112 - offsetY)
-            CGPathAddLineToPoint(path, nil, 76 - offsetX, 157 - offsetY)
-            CGPathAddLineToPoint(path, nil, 115 - offsetX, 154 - offsetY)
-            CGPathAddLineToPoint(path, nil, 114 - offsetX, 113 - offsetY)
-            CGPathAddLineToPoint(path, nil, 147 - offsetX, 96 - offsetY)
-            CGPathAddLineToPoint(path, nil, 155 - offsetX, 35 - offsetY)
+            CGPathMoveToPoint(path, nil, 184 * adjust - offsetX, 31 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 184 * adjust - offsetX, 7 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 7 * adjust - offsetX, 2 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 23 * adjust - offsetX, 35 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 41 * adjust - offsetX, 35 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 45 * adjust - offsetX, 91 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 76 * adjust - offsetX, 112 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 76 * adjust - offsetX, 157 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 115 * adjust - offsetX, 154 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 114 * adjust - offsetX, 113 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 147 * adjust - offsetX, 96 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 155 * adjust - offsetX, 35 * adjust - offsetY)
         } else if sprite.name == "sa_moai_l" {
-            CGPathMoveToPoint(path, nil, 1 - offsetX, 201 - offsetY)
-            CGPathAddLineToPoint(path, nil, 15 - offsetX, 212 - offsetY)
-            CGPathAddLineToPoint(path, nil, 60 - offsetX, 184 - offsetY)
-            CGPathAddLineToPoint(path, nil, 76 - offsetX, 138 - offsetY)
-            CGPathAddLineToPoint(path, nil, 108 - offsetX, 3 - offsetY)
-            CGPathAddLineToPoint(path, nil, 51 - offsetX, 11 - offsetY)
-            CGPathAddLineToPoint(path, nil, 1 - offsetX, 59 - offsetY)
+            CGPathMoveToPoint(path, nil, 1 * adjust - offsetX, 201 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 15 * adjust - offsetX, 212 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 60 * adjust - offsetX, 184 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 76 * adjust - offsetX, 138 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 108 * adjust - offsetX, 3 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 51 * adjust - offsetX, 11 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 1 * adjust - offsetX, 59 * adjust - offsetY)
         } else if sprite.name == "sa_moai_r" {
-            CGPathMoveToPoint(path, nil, 111 - offsetX, 202 - offsetY)
-            CGPathAddLineToPoint(path, nil, 114 - offsetX, 60 - offsetY)
-            CGPathAddLineToPoint(path, nil, 64 - offsetX, 11 - offsetY)
-            CGPathAddLineToPoint(path, nil, 3 - offsetX, 4 - offsetY)
-            CGPathAddLineToPoint(path, nil, 35 - offsetX, 138 - offsetY)
-            CGPathAddLineToPoint(path, nil, 70 - offsetX, 203 - offsetY)
-            CGPathAddLineToPoint(path, nil, 101 - offsetX, 210 - offsetY)
+            CGPathMoveToPoint(path, nil, 111 * adjust - offsetX, 202 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 114 * adjust - offsetX, 60 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 64 * adjust - offsetX, 11 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 3 * adjust - offsetX, 4 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 35 * adjust - offsetX, 138 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 70 * adjust - offsetX, 203 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 101 * adjust - offsetX, 210 * adjust - offsetY)
         } else if sprite.name == "sa_sphinx_l" {
-            CGPathMoveToPoint(path, nil, 1 - offsetX, 77 - offsetY)
-            CGPathAddLineToPoint(path, nil, 36 - offsetX, 130 - offsetY)
-            CGPathAddLineToPoint(path, nil, 54 - offsetX, 133 - offsetY)
-            CGPathAddLineToPoint(path, nil, 75 - offsetX, 107 - offsetY)
-            CGPathAddLineToPoint(path, nil, 88 - offsetX, 51 - offsetY)
-            CGPathAddLineToPoint(path, nil, 176 - offsetX, 38 - offsetY)
-            CGPathAddLineToPoint(path, nil, 180 - offsetX, 20 - offsetY)
-            CGPathAddLineToPoint(path, nil, 111 - offsetX, 6 - offsetY)
-            CGPathAddLineToPoint(path, nil, 2 - offsetX, 3 - offsetY)
+            CGPathMoveToPoint(path, nil, 1 * adjust - offsetX, 77 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 36 * adjust - offsetX, 130 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 54 * adjust - offsetX, 133 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 75 * adjust - offsetX, 107 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 88 * adjust - offsetX, 51 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 176 * adjust - offsetX, 38 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 180 * adjust - offsetX, 20 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 111 * adjust - offsetX, 6 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 2 * adjust - offsetX, 3 * adjust - offsetY)
         } else if sprite.name == "sa_sphinx_r" {
-            CGPathMoveToPoint(path, nil, 187 - offsetX, 74 - offsetY)
-            CGPathAddLineToPoint(path, nil, 184 - offsetX, 33 - offsetY)
-            CGPathAddLineToPoint(path, nil, 114 - offsetX, 1 - offsetY)
-            CGPathAddLineToPoint(path, nil, 4 - offsetX, 16 - offsetY)
-            CGPathAddLineToPoint(path, nil, 9 - offsetX, 35 - offsetY)
-            CGPathAddLineToPoint(path, nil, 93 - offsetX, 48 - offsetY)
-            CGPathAddLineToPoint(path, nil, 110 - offsetX, 102 - offsetY)
-            CGPathAddLineToPoint(path, nil, 130 - offsetX, 129 - offsetY)
-            CGPathAddLineToPoint(path, nil, 149 - offsetX, 125 - offsetY)
-            CGPathAddLineToPoint(path, nil, 160 - offsetX, 110 - offsetY)
+            CGPathMoveToPoint(path, nil, 187 * adjust - offsetX, 74 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 184 * adjust - offsetX, 33 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 114 * adjust - offsetX, 1 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 4 * adjust - offsetX, 16 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 9 * adjust - offsetX, 35 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 93 * adjust - offsetX, 48 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 110 * adjust - offsetX, 102 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 130 * adjust - offsetX, 129 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 149 * adjust - offsetX, 125 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 160 * adjust - offsetX, 110 * adjust - offsetY)
         } else if sprite.name == "sa_venus_l" {
-            CGPathMoveToPoint(path, nil, 2 - offsetX, 84 - offsetY)
-            CGPathAddLineToPoint(path, nil, 62 - offsetX, 168 - offsetY)
-            CGPathAddLineToPoint(path, nil, 76 - offsetX, 166 - offsetY)
-            CGPathAddLineToPoint(path, nil, 82 - offsetX, 183 - offsetY)
-            CGPathAddLineToPoint(path, nil, 95 - offsetX, 193 - offsetY)
-            CGPathAddLineToPoint(path, nil, 105 - offsetX, 188 - offsetY)
-            CGPathAddLineToPoint(path, nil, 102 - offsetX, 146 - offsetY)
-            CGPathAddLineToPoint(path, nil, 15 - offsetX, 7 - offsetY)
-            CGPathAddLineToPoint(path, nil, 1 - offsetX, 7 - offsetY)
+            CGPathMoveToPoint(path, nil, 2 * adjust - offsetX, 84 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 62 * adjust - offsetX, 168 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 76 * adjust - offsetX, 166 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 82 * adjust - offsetX, 183 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 95 * adjust - offsetX, 193 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 105 * adjust - offsetX, 188 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 102 * adjust - offsetX, 146 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 15 * adjust - offsetX, 7 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 1 * adjust - offsetX, 7 * adjust - offsetY)
         } else if sprite.name == "sa_venus_r" {
-            CGPathMoveToPoint(path, nil, 101 - offsetX, 92 - offsetY)
-            CGPathAddLineToPoint(path, nil, 100 - offsetX, 5 - offsetY)
-            CGPathAddLineToPoint(path, nil, 91 - offsetX, 7 - offsetY)
-            CGPathAddLineToPoint(path, nil, 5 - offsetX, 144 - offsetY)
-            CGPathAddLineToPoint(path, nil, 3 - offsetX, 180 - offsetY)
-            CGPathAddLineToPoint(path, nil, 13 - offsetX, 191 - offsetY)
-            CGPathAddLineToPoint(path, nil, 28 - offsetX, 185 - offsetY)
-            CGPathAddLineToPoint(path, nil, 49 - offsetX, 163 - offsetY)
+            CGPathMoveToPoint(path, nil, 101 * adjust - offsetX, 92 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 100 * adjust - offsetX, 5 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 91 * adjust - offsetX, 7 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 5 * adjust - offsetX, 144 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 3 * adjust - offsetX, 180 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 13 * adjust - offsetX, 191 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 28 * adjust - offsetX, 185 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 49 * adjust - offsetX, 163 * adjust - offsetY)
         } else if sprite.name == "tw_eiffel_l" {
-            CGPathMoveToPoint(path, nil, 2 - offsetX, 78 - offsetY)
-            CGPathAddLineToPoint(path, nil, 57 - offsetX, 54 - offsetY)
-            CGPathAddLineToPoint(path, nil, 162 - offsetX, 47 - offsetY)
-            CGPathAddLineToPoint(path, nil, 62 - offsetX, 35 - offsetY)
-            CGPathAddLineToPoint(path, nil, 3 - offsetX, 6 - offsetY)
+            CGPathMoveToPoint(path, nil, 2 * adjust - offsetX, 78 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 57 * adjust - offsetX, 54 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 162 * adjust - offsetX, 47 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 62 * adjust - offsetX, 35 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 3 * adjust - offsetX, 6 * adjust - offsetY)
         } else if sprite.name == "tw_eiffel_r" {
-            CGPathMoveToPoint(path, nil, 161 - offsetX, 77 - offsetY)
-            CGPathAddLineToPoint(path, nil, 163 - offsetX, 8 - offsetY)
-            CGPathAddLineToPoint(path, nil, 102 - offsetX, 30 - offsetY)
-            CGPathAddLineToPoint(path, nil, 3 - offsetX, 37 - offsetY)
-            CGPathAddLineToPoint(path, nil, 102 - offsetX, 48 - offsetY)
+            CGPathMoveToPoint(path, nil, 161 * adjust - offsetX, 77 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 163 * adjust - offsetX, 8 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 102 * adjust - offsetX, 30 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 3 * adjust - offsetX, 37 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 102 * adjust - offsetX, 48 * adjust - offsetY)
         } else if sprite.name == "tw_empire_l" {
-            CGPathMoveToPoint(path, nil, 3 - offsetX, 79 - offsetY)
-            CGPathAddLineToPoint(path, nil, 46 - offsetX, 52 - offsetY)
-            CGPathAddLineToPoint(path, nil, 118 - offsetX, 51 - offsetY)
-            CGPathAddLineToPoint(path, nil, 166 - offsetX, 38 - offsetY)
-            CGPathAddLineToPoint(path, nil, 115 - offsetX, 25 - offsetY)
-            CGPathAddLineToPoint(path, nil, 51 - offsetX, 27 - offsetY)
-            CGPathAddLineToPoint(path, nil, 2 - offsetX, 1 - offsetY)
+            CGPathMoveToPoint(path, nil, 3 * adjust - offsetX, 79 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 46 * adjust - offsetX, 52 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 118 * adjust - offsetX, 51 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 166 * adjust - offsetX, 38 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 115 * adjust - offsetX, 25 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 51 * adjust - offsetX, 27 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 2 * adjust - offsetX, 1 * adjust - offsetY)
         } else if sprite.name == "tw_empire_r" {
-            CGPathMoveToPoint(path, nil, 171 - offsetX, 71 - offsetY)
-            CGPathAddLineToPoint(path, nil, 169 - offsetX, 5 - offsetY)
-            CGPathAddLineToPoint(path, nil, 123 - offsetX, 24 - offsetY)
-            CGPathAddLineToPoint(path, nil, 59 - offsetX, 24 - offsetY)
-            CGPathAddLineToPoint(path, nil, 4 - offsetX, 36 - offsetY)
-            CGPathAddLineToPoint(path, nil, 34 - offsetX, 38 - offsetY)
-            CGPathAddLineToPoint(path, nil, 55 - offsetX, 50 - offsetY)
-            CGPathAddLineToPoint(path, nil, 113 - offsetX, 49 - offsetY)
+            CGPathMoveToPoint(path, nil, 171 * adjust - offsetX, 71 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 169 * adjust - offsetX, 5 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 123 * adjust - offsetX, 24 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 59 * adjust - offsetX, 24 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 4 * adjust - offsetX, 36 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 34 * adjust - offsetX, 38 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 55 * adjust - offsetX, 50 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 113 * adjust - offsetX, 49 * adjust - offsetY)
         } else if sprite.name == "tw_sagrada_l" {
-            CGPathMoveToPoint(path, nil, 2 - offsetX, 146 - offsetY)
-            CGPathAddLineToPoint(path, nil, 48 - offsetX, 145 - offsetY)
-            CGPathAddLineToPoint(path, nil, 48 - offsetX, 109 - offsetY)
-            CGPathAddLineToPoint(path, nil, 183 - offsetX, 99 - offsetY)
-            CGPathAddLineToPoint(path, nil, 200 - offsetX, 83 - offsetY)
-            CGPathAddLineToPoint(path, nil, 196 - offsetX, 50 - offsetY)
-            CGPathAddLineToPoint(path, nil, 184 - offsetX, 41 - offsetY)
-            CGPathAddLineToPoint(path, nil, 69 - offsetX, 21 - offsetY)
-            CGPathAddLineToPoint(path, nil, 68 - offsetX, 11 - offsetY)
-            CGPathAddLineToPoint(path, nil, 1 - offsetX, 5 - offsetY)
+            CGPathMoveToPoint(path, nil, 2 * adjust - offsetX, 146 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 48 * adjust - offsetX, 145 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 48 * adjust - offsetX, 109 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 183 * adjust - offsetX, 99 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 200 * adjust - offsetX, 83 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 196 * adjust - offsetX, 50 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 184 * adjust - offsetX, 41 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 69 * adjust - offsetX, 21 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 68 * adjust - offsetX, 11 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 1 * adjust - offsetX, 5 * adjust - offsetY)
         } else if sprite.name == "tw_sagrada_r" {
-            CGPathMoveToPoint(path, nil, 195 - offsetX, 146 - offsetY)
-            CGPathAddLineToPoint(path, nil, 139 - offsetX, 140 - offsetY)
-            CGPathAddLineToPoint(path, nil, 132 - offsetX, 118 - offsetY)
-            CGPathAddLineToPoint(path, nil, 30 - offsetX, 114 - offsetY)
-            CGPathAddLineToPoint(path, nil, 3 - offsetX, 99 - offsetY)
-            CGPathAddLineToPoint(path, nil, 3 - offsetX, 70 - offsetY)
-            CGPathAddLineToPoint(path, nil, 20 - offsetX, 50 - offsetY)
-            CGPathAddLineToPoint(path, nil, 154 - offsetX, 41 - offsetY)
-            CGPathAddLineToPoint(path, nil, 154 - offsetX, 9 - offsetY)
-            CGPathAddLineToPoint(path, nil, 196 - offsetX, 5 - offsetY)
+            CGPathMoveToPoint(path, nil, 195 * adjust - offsetX, 146 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 139 * adjust - offsetX, 140 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 132 * adjust - offsetX, 118 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 30 * adjust - offsetX, 114 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 3 * adjust - offsetX, 99 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 3 * adjust - offsetX, 70 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 20 * adjust - offsetX, 50 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 154 * adjust - offsetX, 41 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 154 * adjust - offsetX, 9 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 196 * adjust - offsetX, 5 * adjust - offsetY)
         } else if sprite.name == "tw_touhoh_l" {
-            CGPathMoveToPoint(path, nil, 2 - offsetX, 67 - offsetY)
-            CGPathAddLineToPoint(path, nil, 42 - offsetX, 46 - offsetY)
-            CGPathAddLineToPoint(path, nil, 55 - offsetX, 53 - offsetY)
-            CGPathAddLineToPoint(path, nil, 74 - offsetX, 43 - offsetY)
-            CGPathAddLineToPoint(path, nil, 149 - offsetX, 48 - offsetY)
-            CGPathAddLineToPoint(path, nil, 161 - offsetX, 39 - offsetY)
-            CGPathAddLineToPoint(path, nil, 204 - offsetX, 37 - offsetY)
-            CGPathAddLineToPoint(path, nil, 204 - offsetX, 33 - offsetY)
-            CGPathAddLineToPoint(path, nil, 160 - offsetX, 30 - offsetY)
-            CGPathAddLineToPoint(path, nil, 149 - offsetX, 22 - offsetY)
-            CGPathAddLineToPoint(path, nil, 75 - offsetX, 22 - offsetY)
-            CGPathAddLineToPoint(path, nil, 60 - offsetX, 17 - offsetY)
-            CGPathAddLineToPoint(path, nil, 4 - offsetX, 5 - offsetY)
+            CGPathMoveToPoint(path, nil, 2 * adjust - offsetX, 67 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 42 * adjust - offsetX, 46 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 55 * adjust - offsetX, 53 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 74 * adjust - offsetX, 43 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 149 * adjust - offsetX, 48 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 161 * adjust - offsetX, 39 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 204 * adjust - offsetX, 37 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 204 * adjust - offsetX, 33 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 160 * adjust - offsetX, 30 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 149 * adjust - offsetX, 22 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 75 * adjust - offsetX, 22 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 60 * adjust - offsetX, 17 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 4 * adjust - offsetX, 5 * adjust - offsetY)
         } else if sprite.name == "tw_touhoh_r" {
-            CGPathMoveToPoint(path, nil, 208 - offsetX, 67 - offsetY)
-            CGPathAddLineToPoint(path, nil, 165 - offsetX, 47 - offsetY)
-            CGPathAddLineToPoint(path, nil, 150 - offsetX, 54 - offsetY)
-            CGPathAddLineToPoint(path, nil, 134 - offsetX, 43 - offsetY)
-            CGPathAddLineToPoint(path, nil, 57 - offsetX, 52 - offsetY)
-            CGPathAddLineToPoint(path, nil, 44 - offsetX, 43 - offsetY)
-            CGPathAddLineToPoint(path, nil, 3 - offsetX, 39 - offsetY)
-            CGPathAddLineToPoint(path, nil, 3 - offsetX, 37 - offsetY)
-            CGPathAddLineToPoint(path, nil, 45 - offsetX, 33 - offsetY)
-            CGPathAddLineToPoint(path, nil, 56 - offsetX, 24 - offsetY)
-            CGPathAddLineToPoint(path, nil, 135 - offsetX, 26 - offsetY)
-            CGPathAddLineToPoint(path, nil, 149 - offsetX, 20 - offsetY)
-            CGPathAddLineToPoint(path, nil, 205 - offsetX, 3 - offsetY)
+            CGPathMoveToPoint(path, nil, 208 * adjust - offsetX, 67 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 165 * adjust - offsetX, 47 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 150 * adjust - offsetX, 54 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 134 * adjust - offsetX, 43 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 57 * adjust - offsetX, 52 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 44 * adjust - offsetX, 43 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 3 * adjust - offsetX, 39 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 3 * adjust - offsetX, 37 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 45 * adjust - offsetX, 33 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 56 * adjust - offsetX, 24 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 135 * adjust - offsetX, 26 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 149 * adjust - offsetX, 20 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 205 * adjust - offsetX, 3 * adjust - offsetY)
         } else {
-            CGPathMoveToPoint(path, nil, 0 - offsetX, 0 - offsetY)
-            CGPathAddLineToPoint(path, nil, 0 - offsetX, 0 - offsetY)
-            CGPathAddLineToPoint(path, nil, 0 - offsetX, 0 - offsetY)
+            CGPathMoveToPoint(path, nil, 0 * adjust - offsetX, 0 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 0 * adjust - offsetX, 0 * adjust - offsetY)
+            CGPathAddLineToPoint(path, nil, 0 * adjust - offsetX, 0 * adjust - offsetY)
         }
         
         CGPathCloseSubpath(path)
