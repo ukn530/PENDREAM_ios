@@ -32,8 +32,8 @@ extension SKNode {
 
 class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBannerViewDelegate, SKProductsRequestDelegate, SKPaymentTransactionObserver {
     
-    let banner = ADBannerView(frame: CGRectZero)
-    //var isTapRestore = false
+    var banner = GADBannerView() // create the banner
+    var isTapRestore = true
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -64,7 +64,8 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBa
             println("scene.height = \(scene.frame.height)")
             skView.presentScene(scene)
         }
-
+        
+        /*
         let userDefaults = NSUserDefaults.standardUserDefaults()
         let isPurchased: Bool = userDefaults.boolForKey("isPurchased")
         if !isPurchased {
@@ -74,8 +75,22 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBa
             banner.hidden = true
             self.view.addSubview(banner)
         }
+        */
+        //let banner = ADBannerView(frame: CGRectZero)
+        var origin = CGPointMake(0.0, CGRectGetHeight(self.view.frame)); // place at bottom of view
+        var size = GADAdSizeFullWidthPortraitWithHeight(50) // set size to 50
+        banner = GADBannerView(adSize: size, origin: origin) // create the banner
+        banner.adUnitID = "ca-app-pub-2861384452756784/2814542027"
+        //banner.delegate = self
+        banner.rootViewController = self
+        self.view.addSubview(banner)
         
-        println("check in app purchase = \(checkInAppPurchase())")
+        var request = GADRequest()
+        #if RELEASE
+        #else
+            request.testDevices = ["6f0316d55038e000e5b102394567d0a6"]
+        #endif
+        banner.loadRequest(request)
 
         /*
         let view = UIView()
@@ -105,7 +120,7 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBa
     
     func startInAppPurchase(notification: NSNotification) {
         println("startInAppPurchase")
-        /*
+        
         let alert = UIAlertController(title: "Confirmation", message: "Have you ever purchased this?", preferredStyle: UIAlertControllerStyle.Alert)
         alert.addAction(UIAlertAction(title: "Yes", style: UIAlertActionStyle.Default, handler: { action in
             switch action.style{
@@ -144,7 +159,7 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBa
         }))
         alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler: nil))
         self.presentViewController(alert, animated: true, completion: nil)
-        */
+
         
         // check if products is in app store
         let set = NSSet(objects: adProductId)
@@ -219,14 +234,14 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBa
                 queue.finishTransaction(transaction as SKPaymentTransaction)
             } else if transaction.transactionState == SKPaymentTransactionState.Restored {
                 println("restored")
-                /*
+                
                 let userDefaults = NSUserDefaults.standardUserDefaults()
                 userDefaults.setBool(true, forKey: "isPurchased")
                 banner.removeFromSuperview()
                 NSNotificationCenter.defaultCenter().postNotificationName("purchased", object: nil, userInfo: nil)
                 queue.finishTransaction(transaction as SKPaymentTransaction)
                 isTapRestore = false
-                */
+
             } else {
                 println("else")
                 queue.finishTransaction(transaction as SKPaymentTransaction)

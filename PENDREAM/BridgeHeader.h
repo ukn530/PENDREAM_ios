@@ -11,4 +11,6 @@
 
 #import "Flurry.h"
 
+#import "GADBannerView.h"
+
 #endif

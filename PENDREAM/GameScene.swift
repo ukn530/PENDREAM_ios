@@ -10,6 +10,8 @@ import SpriteKit
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
+    let isDev = true
+    
     // MARK: Property
     
     // propety of penguin
@@ -17,17 +19,26 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var radian: Double = 0
     var overCounter = CGFloat(0)
     
+    let penguinCloseTex1 = SKTexture(imageNamed: "penguin_close1")
+    let penguinCloseTex2 = SKTexture(imageNamed: "penguin_close2")
+    let penguinOpenTex1 = SKTexture(imageNamed: "penguin_open1")
+    let penguinOpenTex2 = SKTexture(imageNamed: "penguin_open2")
+    
+    //var penguinTex1 = SKTexture(imageNamed: "penguin_open1")
+    //var penguinTex2 = SKTexture(imageNamed: "penguin_open2")
+    
     // property of Obstacle
     let 🐱s = [SKSpriteNode(), SKSpriteNode(), SKSpriteNode(), SKSpriteNode()]
     let obstacleNameArray = ["st_pen_l", "st_pen_r", "st_erasor_l", "st_erasor_r","st_scale_l", "st_scale_r", "st_scessor_l", "st_scessor_r", "fd_banana_l", "fd_banana_r", "fd_bread_l", "fd_bread_r", "fd_chocolate_l", "fd_chocolate_r", "fd_pasta_l", "fd_pasta_r", "an_ant_l", "an_ant_r", "an_cat_l", "an_cat_r", "an_cow_l", "an_cow_r", "an_whale_l", "an_whale_r", "sa_daibutsu_l", "sa_daibutsu_r", "sa_moai_l", "sa_moai_r", "sa_sphinx_l", "sa_sphinx_r", "sa_venus_l", "sa_venus_r", "tw_eiffel_l", "tw_eiffel_r", "tw_empire_l", "tw_empire_r", "tw_sagrada_l", "tw_sagrada_r", "tw_touhoh_l", "tw_touhoh_r"]
     var previousObstacleY = CGFloat(0)
-    let speedObstacle = CGFloat(3.8)
+    let speedObstacle = CGFloat(3)
     var acceration = CGFloat(1)
+    let maxAcceration = CGFloat(6)
     let background = SKSpriteNode(imageNamed: "background")
     let background2 = SKSpriteNode(imageNamed: "background")
     
     // the framerate of stop motion animetion is 12 frames in a second
-    let animationRate = 10
+    let animationRate = 20
     var animeCounter = 0
     var animeState = 0
     
@@ -50,6 +61,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var goY = CGFloat(0)
     let gameoverTitle = SKSpriteNode()
     let board = SKSpriteNode()
+    let boardTex1 = SKTexture(imageNamed: "board1")
+    let boardTex2 = SKTexture(imageNamed: "board2")
+    let gameoverTex1 = SKTexture(imageNamed: "gameover1")
+    let gameoverTex2 = SKTexture(imageNamed: "gameover2")
+    let startButtonTex1 = SKTexture(imageNamed: "button_start1")
+    let startButtonTex2 = SKTexture(imageNamed: "button_start2")
+    let rankingButtonTex1 = SKTexture(imageNamed: "button_ranking1")
+    let rankingButtonTex2 = SKTexture(imageNamed: "button_ranking2")
     
     let scoreText = SKSpriteNode(imageNamed: "score")
     let bestText = SKSpriteNode(imageNamed: "best")
@@ -158,12 +177,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             // remove gameover board
             animateStart()
         } else if gameState == GAME_OVER {
-            
+
             animateOver()
+
         }
 
     }
-    
+
     
     // 🐧🐧🐧🐧🐧🐧🐧🐧🐧🐧
     
@@ -194,7 +214,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             if isOpenUmbrella {
                 acceration = 1
             } else {
-                if acceration < speedObstacle {
+                if acceration < maxAcceration {
                     acceration *= 1.03
                 }
             }
@@ -222,8 +242,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
             
             
-            background.position.y += speedObstacle * acceration * 0.999
-            background2.position.y += speedObstacle * acceration * 0.999
+            background.position.y += speedObstacle * acceration * 0.94
+            background2.position.y += speedObstacle * acceration * 0.94
             
             if background.position.y > background.size.height {
                 background.position.y = background2.position.y - background.size.height
@@ -319,7 +339,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     // reset 🐧's texture and position
     func resetPenguin() {
         
-        alternateTexture(Sprite: 🐧, ImageName1: "penguin_open1", ImageName2: "penguin_open2")
+        //alternateTexture(Sprite: 🐧, ImageName1: "penguin_open1", ImageName2: "penguin_open2")
+        
+        🐧.removeActionForKey("penguin")
+        🐧.runAction(SKAction.repeatActionForever(SKAction.animateWithTextures([penguinOpenTex1, penguinOpenTex2], timePerFrame: 0.1)), withKey: "penguin")
+        🐧.size = penguinOpenTex1.size()
+        
         🐧.position = CGPoint(x:CGRectGetMidX(self.frame), y:CGRectGetMidY(self.frame) * 3 / 2)
         
         🐧.zRotation = 0
@@ -338,15 +363,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         var rand = 0
         
-        if score < 10 {
+        if score < 7 {
             rand = Int(arc4random_uniform(UInt32(8)))
-        } else if score < 20 {
+        } else if score < 17 {
             rand = Int(arc4random_uniform(UInt32(8))) + 8
-        } else if score < 30 {
+        } else if score < 27 {
             rand = Int(arc4random_uniform(UInt32(8))) + 16
-        } else if score < 40 {
+        } else if score < 37 {
             rand = Int(arc4random_uniform(UInt32(8))) + 24
-        } else if score < 50 {
+        } else if score < 47 {
             rand = Int(arc4random_uniform(UInt32(8))) + 32
         } else {
             rand = Int(arc4random_uniform(UInt32(40)))
@@ -361,11 +386,26 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         🐱.name = name
         🐱.zPosition = 1
         
+        var difficulty: CGFloat = 1.0
+        if score < 1 {
+            difficulty = 2
+        } else if score < 3 {
+            difficulty = 1.3
+        } else if score < 7 {
+            difficulty = 1.2
+        } else if score < 20 {
+            difficulty = 1.1
+        } else if score < 40 {
+            difficulty = 1
+        } else {
+            difficulty = 0.9
+        }
+        
         if rand%2 == 0 {
-            🐱.position = CGPoint(x:0, y:previousObstacleY - 🐱.size.height - 🐧.size.height)
+            🐱.position = CGPoint(x:0, y:previousObstacleY - 🐱.size.height - 🐧.size.height * difficulty)
             🐱.anchorPoint = CGPoint(x:0, y:0)
         } else {
-            🐱.position = CGPoint(x:CGRectGetMaxX(self.frame), y:previousObstacleY - 🐱.size.height - 🐧.size.height*0.9)
+            🐱.position = CGPoint(x:CGRectGetMaxX(self.frame), y:previousObstacleY - 🐱.size.height - 🐧.size.height * difficulty)
             🐱.anchorPoint = CGPoint(x:1.0, y:0)
         }
         
@@ -463,13 +503,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func setupGameover() {
         
         // Board of Score
-        alternateTexture(Sprite: board, ImageName1: "board1", ImageName2: "board2")
+        //alternateTexture(Sprite: board, ImageName1: "board1", ImageName2: "board2")
+        board.size = boardTex1.size()
+        board.removeActionForKey("board")
+        board.runAction(SKAction.repeatActionForever(SKAction.animateWithTextures([boardTex1, boardTex2], timePerFrame: 0.1)), withKey: "board")
         board.position = CGPoint(x: CGRectGetMidX(self.frame), y: CGRectGetMidY(self.frame)*1.25 + goY)
         board.zPosition = 2
         self.addChild(board)
         
         // Title of GAMEOVER
-        alternateTexture(Sprite: gameoverTitle, ImageName1: "gameover1", ImageName2: "gameover2")
+        //alternateTexture(Sprite: gameoverTitle, ImageName1: "gameover1", ImageName2: "gameover2")
+        gameoverTitle.size = gameoverTex1.size()
+        gameoverTitle.removeActionForKey("gameover")
+        gameoverTitle.runAction(SKAction.repeatActionForever(SKAction.animateWithTextures([gameoverTex1, gameoverTex2], timePerFrame: 0.1)), withKey: "gameover")
         gameoverTitle.position = CGPoint(x: CGRectGetMidX(self.frame), y: board.position.y + board.size.height * 7/10)
         gameoverTitle.zPosition = 2
         self.addChild(gameoverTitle)
@@ -526,7 +572,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.addChild(fbButton)
         
         // Start Button
-        alternateTexture(Sprite: startButton, ImageName1: "button_start1", ImageName2: "button_start2")
+        //alternateTexture(Sprite: startButton, ImageName1: "button_start1", ImageName2: "button_start2")
+        startButton.removeActionForKey("startButton")
+        startButton.runAction(SKAction.repeatActionForever(SKAction.animateWithTextures([startButtonTex1, startButtonTex2], timePerFrame: 0.1)), withKey: "startButton")
+        
+        startButton.size = startButtonTex1.size()
         startButton.position = CGPoint(x: board.position.x, y: board.position.y - board.size.height * 11/10)
         if CGRectGetHeight(UIScreen.mainScreen().bounds) < 568 && !isPurchased{
             startButton.position.y = board.position.y - board.size.height*19/20
@@ -536,7 +586,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.addChild(startButton)
         
         // Ranking Button
-        alternateTexture(Sprite: rankingButton, ImageName1: "button_ranking1", ImageName2: "button_ranking2")
+        //alternateTexture(Sprite: rankingButton, ImageName1: "button_ranking1", ImageName2: "button_ranking2")
+        
+        rankingButton.removeActionForKey("rankingButton")
+        rankingButton.runAction(SKAction.repeatActionForever(SKAction.animateWithTextures([rankingButtonTex1, rankingButtonTex2], timePerFrame: 0.1)), withKey: "rankingButton")
+        
+        rankingButton.size = rankingButtonTex1.size()
+        
         rankingButton.position = CGPoint(x: board.position.x, y: board.position.y - board.size.height * 15/10)
         if CGRectGetHeight(UIScreen.mainScreen().bounds) < 568 && !isPurchased {
             rankingButton.position.y = board.position.y - board.size.height*13/10
@@ -555,14 +611,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         let userDefaults = NSUserDefaults.standardUserDefaults()
         isPurchased = userDefaults.boolForKey("isPurchased")
+        
         if !isPurchased {
             // NoAd Button
             noadButton.anchorPoint = CGPoint(x: 1, y: 0.5)
             noadButton.position = CGPoint(x:CGRectGetMaxX(self.frame), y: board.position.y - board.size.height * 10/11)
             noadButton.zPosition = 2
             noadButton.name = "noad_button"
-            self.addChild(noadButton)
+            //self.addChild(noadButton)
         }
+
     }
     
     
@@ -574,7 +632,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             isOpenUmbrella = false
             fallingSound.playSound()
             fallingvoiceSound.playSound()
-            alternateTexture(Sprite: 🐧, ImageName1: "penguin_close1", ImageName2: "penguin_close2")
+            
+            🐧.removeActionForKey("penguin")
+            //alternateTexture(Sprite: 🐧, ImageName1: "penguin_close1", ImageName2: "penguin_close2")
+            🐧.runAction(SKAction.repeatActionForever(SKAction.animateWithTextures([penguinCloseTex1, penguinCloseTex2], timePerFrame: 0.1)), withKey: "penguin")
             🐧.physicsBody = SKPhysicsBody(polygonFromPath: drawPath(Sprite: 🐧))
             🐧.physicsBody?.affectedByGravity = false
             🐧.physicsBody?.categoryBitMask = obstacleCategory
@@ -613,7 +674,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         fallingSound.stopSound()
         if gameState == GAME_PLAY {
             isOpenUmbrella = true
-            alternateTexture(Sprite: 🐧, ImageName1: "penguin_open1", ImageName2: "penguin_open2")
+            //alternateTexture(Sprite: 🐧, ImageName1: "penguin_open1", ImageName2: "penguin_open2")
+            
+            
+            🐧.removeActionForKey("penguin")
+            🐧.runAction(SKAction.repeatActionForever(SKAction.animateWithTextures([penguinOpenTex1, penguinOpenTex2], timePerFrame: 0.1)), withKey: "penguin")
             🐧.physicsBody = SKPhysicsBody(polygonFromPath: drawPath(Sprite: 🐧))
             🐧.physicsBody?.affectedByGravity = false
             🐧.physicsBody?.categoryBitMask = obstacleCategory
@@ -629,27 +694,39 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                         resetGame()
                         bgmSound.playSound()
                         isHit = false
+                        #if RELEASE
                         Flurry.logEvent("TapStartInGameScene")
+                        #endif
                     } else if (touchButtonName == "ranking_button") {
                         showScore()
+                        #if RELEASE
                         Flurry.logEvent("TapRankingInGameScene")
+                        #endif
                     } else if (touchButtonName == "twitter_button") {
                         shareSNS("twitter")
+                        #if RELEASE
                         Flurry.logEvent("TapTwitterInGameScene")
+                        #endif
                     } else if (touchButtonName == "facebook_button") {
                         shareSNS("facebook")
+                        #if RELEASE
                         Flurry.logEvent("TapFacebookInGameScene")
+                        #endif
                     } else if (touchButtonName == "back_button") {
                         let reveal = SKTransition.fadeWithColor(UIColor.whiteColor(), duration: 0.5)
                         let scene = StartScene()
                         scene.size = self.frame.size
                         scene.scaleMode = .AspectFill
                         self.view?.presentScene(scene, transition: reveal)
+                        #if RELEASE
                         Flurry.logEvent("TapBackInGameScene")
+                        #endif
                     } else if (touchButtonName == "noad_button") {
                         println(touchButtonName)
                         NSNotificationCenter.defaultCenter().postNotificationName("noAds", object: nil, userInfo: nil)
+                        #if RELEASE
                         Flurry.logEvent("TapNoadsInGameScene")
+                        #endif
                     }
                 }
             }
@@ -693,8 +770,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
             println("playTimes = \(playTimes)")
             //Send to Flurry for Analytics
+            #if RELEASE
             var scoreDictionary: [String: Int] = ["playTime": userDefaults.integerForKey("playTimes"), "score": score, "bestScore": bestScore]
             Flurry.logEvent("gameOver", withParameters: scoreDictionary, timed: true)
+            #endif
             
             for num in counterSmallSpriteArray {
                 num.texture = nil
@@ -746,10 +825,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func purchased(notification: NSNotification) {
         println("noadButton.removeFromParent()")
         noadButton.removeFromParent()
-        
-        let userDefaults = NSUserDefaults.standardUserDefaults()
-        var scoreDictionary: [String: Int] = ["playTime": userDefaults.integerForKey("playTimes"), "score": score, "bestScore": bestScore]
-        Flurry.logEvent("purchased", withParameters: scoreDictionary, timed: true)
+        #if RELEASE
+            let userDefaults = NSUserDefaults.standardUserDefaults()
+            var scoreDictionary: [String: Int] = ["playTime": userDefaults.integerForKey("playTimes"), "score": score, "bestScore": bestScore]
+            Flurry.logEvent("purchased", withParameters: scoreDictionary, timed: true)
+        #endif
     }
     
     
@@ -762,7 +842,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let tex2 = SKTexture(imageNamed: imageName2)
         let texArray = [tex1, tex2]
         sprite.size = tex1.size()
-        sprite.runAction(SKAction.repeatActionForever(SKAction.animateWithTextures(texArray, timePerFrame: 0.1)))
+        sprite.runAction(SKAction.repeatActionForever(SKAction.animateWithTextures(texArray, timePerFrame: 0.1)), withKey: "penguin")
     }
     
     
