@@ -1,0 +1,19 @@
+/* 
+  Localizable.strings
+  PENDREAM
+
+  Created by ukn on 1/24/15.
+  Copyright (c) 2015 ukn. All rights reserved.
+*/
+
+"Confirmation" = "Remove Ads";
+"Description" = "You can remove ads. If you have already paid it, please select Restore Purchase.";
+"Yes" = "Remove Ads";
+"Restore" = "Restore Purchase";
+"Cancel" = "Cancel";
+
+"Enjoy" = "(-o-)< Enjoy?";
+"RateDescription" = "Thank you for playing! If you enjoy, would you mind rate me in the App Store?";
+"Rate" = "Rate now";
+"Later" = "Maybe Later";
+"NoThanks" = "No, Thanks";

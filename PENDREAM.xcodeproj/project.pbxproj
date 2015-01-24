@@ -29,6 +29,8 @@
 		61A7FD7A1A2F5FDC00F410BA /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 61A7FD781A2F5FDC00F410BA /* Main.storyboard */; };
 		61A7FD7C1A2F5FDC00F410BA /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 61A7FD7B1A2F5FDC00F410BA /* Images.xcassets */; };
 		61A7FD8B1A2F5FDC00F410BA /* PENDREAMTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61A7FD8A1A2F5FDC00F410BA /* PENDREAMTests.swift */; };
+		61EC3CC31A73582500481838 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 61EC3CC51A73582500481838 /* Localizable.strings */; };
+		61EC3CCA1A73883300481838 /* path.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61EC3CC91A73883300481838 /* path.swift */; };
 		61F217C11A4EED3C0099AA3D /* bgm.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 61F217BB1A4EED3C0099AA3D /* bgm.mp3 */; };
 		61F217C21A4EED3C0099AA3D /* collision.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 61F217BC1A4EED3C0099AA3D /* collision.mp3 */; };
 		61F217C31A4EED3C0099AA3D /* falling.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 61F217BD1A4EED3C0099AA3D /* falling.mp3 */; };
@@ -91,6 +93,10 @@
 		61A7FD891A2F5FDC00F410BA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		61A7FD8A1A2F5FDC00F410BA /* PENDREAMTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PENDREAMTests.swift; sourceTree = "<group>"; };
 		61C125561A407EB100F66ED5 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		61EC3CC41A73582500481838 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		61EC3CC71A73597500481838 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Main.strings; sourceTree = "<group>"; };
+		61EC3CC81A73597500481838 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
+		61EC3CC91A73883300481838 /* path.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = path.swift; sourceTree = "<group>"; };
 		61F217BB1A4EED3C0099AA3D /* bgm.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = bgm.mp3; sourceTree = "<group>"; };
 		61F217BC1A4EED3C0099AA3D /* collision.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = collision.mp3; sourceTree = "<group>"; };
 		61F217BD1A4EED3C0099AA3D /* falling.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = falling.mp3; sourceTree = "<group>"; };
@@ -192,9 +198,11 @@
 				61A7FD701A2F5FDB00F410BA /* AppDelegate.swift */,
 				61A7FD721A2F5FDB00F410BA /* GameScene.sks */,
 				61A7FD741A2F5FDB00F410BA /* GameScene.swift */,
+				61EC3CC91A73883300481838 /* path.swift */,
 				6125EBCF1A389073006CC195 /* StartScene.sks */,
 				6125EBCB1A389025006CC195 /* StartScene.swift */,
 				61A7FD761A2F5FDB00F410BA /* GameViewController.swift */,
+				61EC3CC51A73582500481838 /* Localizable.strings */,
 				61F217C71A4EED930099AA3D /* Sound.swift */,
 				61F217D61A4FBE370099AA3D /* Strings.swift */,
 				61A7FD781A2F5FDC00F410BA /* Main.storyboard */,
@@ -321,6 +329,7 @@
 			knownRegions = (
 				en,
 				Base,
+				ja,
 			);
 			mainGroup = 61A7FD621A2F5FDB00F410BA;
 			productRefGroup = 61A7FD6C1A2F5FDB00F410BA /* Products */;
@@ -339,6 +348,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				61F217C41A4EED3C0099AA3D /* fallingvoice.mp3 in Resources */,
+				61EC3CC31A73582500481838 /* Localizable.strings in Resources */,
 				61F217C21A4EED3C0099AA3D /* collision.mp3 in Resources */,
 				61883B681A62E3AA00D1497F /* README.txt in Resources */,
 				61A7FD7C1A2F5FDC00F410BA /* Images.xcassets in Resources */,
@@ -372,6 +382,7 @@
 				61A7FD711A2F5FDB00F410BA /* AppDelegate.swift in Sources */,
 				61F217D71A4FBE370099AA3D /* Strings.swift in Sources */,
 				6125EBCC1A389025006CC195 /* StartScene.swift in Sources */,
+				61EC3CCA1A73883300481838 /* path.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -398,8 +409,18 @@
 			isa = PBXVariantGroup;
 			children = (
 				61A7FD791A2F5FDC00F410BA /* Base */,
+				61EC3CC71A73597500481838 /* ja */,
 			);
 			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		61EC3CC51A73582500481838 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				61EC3CC41A73582500481838 /* en */,
+				61EC3CC81A73597500481838 /* ja */,
+			);
+			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -478,7 +499,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_SWIFT_FLAGS = "-R RELEASE";
+				OTHER_SWIFT_FLAGS = "-D RELEASE";
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -523,7 +544,7 @@
 					"$(PROJECT_DIR)/PENDREAM",
 				);
 				OTHER_LDFLAGS = "-ObjC";
-				OTHER_SWIFT_FLAGS = "-R RELEASE";
+				OTHER_SWIFT_FLAGS = "-D RELEASE";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = /Users/ukn/Documents/iOS/PENDREAM/PENDREAM/BridgeHeader.h;

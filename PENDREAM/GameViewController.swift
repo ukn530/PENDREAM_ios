@@ -33,7 +33,8 @@ extension SKNode {
 class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBannerViewDelegate, SKProductsRequestDelegate, SKPaymentTransactionObserver {
     
     var banner = GADBannerView() // create the banner
-    var isTapRestore = true
+    var isTapRestore = false
+    var activityIndicator = UIActivityIndicatorView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -44,10 +45,10 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBa
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "getOver:", name: "getOver", object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "getPlay:", name: "getPlay", object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "startInAppPurchase:", name: "noAds", object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "rate:", name: "Rate", object: nil)
         
         authenticateLocalPlayer()
         
-        //if let scene = StartScene.unarchiveFromFile("GameScene") as? StartScene {
         if let scene = StartScene.unarchiveFromFile("GameScene") as? StartScene {
             // Configure the view.
             let skView = self.view as SKView
@@ -65,43 +66,31 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBa
             skView.presentScene(scene)
         }
         
-        /*
+        
         let userDefaults = NSUserDefaults.standardUserDefaults()
         let isPurchased: Bool = userDefaults.boolForKey("isPurchased")
         if !isPurchased {
-            banner.frame.origin.y = CGRectGetHeight(self.view.frame)
-            banner.delegate = self
-            banner.sizeToFit()
-            banner.hidden = true
+            var origin = CGPointMake(0.0, CGRectGetHeight(self.view.frame)); // place at bottom of view
+            var size = GADAdSizeFullWidthPortraitWithHeight(50) // set size to 50
+            banner = GADBannerView(adSize: size, origin: origin) // create the banner
+            banner.adUnitID = "ca-app-pub-2861384452756784/2814542027"
+            banner.rootViewController = self
             self.view.addSubview(banner)
+            
+            var request = GADRequest()
+            #if RELEASE
+                #else
+                request.testDevices = ["6f0316d55038e000e5b102394567d0a6"]
+            #endif
+            banner.loadRequest(request)
         }
-        */
-        //let banner = ADBannerView(frame: CGRectZero)
-        var origin = CGPointMake(0.0, CGRectGetHeight(self.view.frame)); // place at bottom of view
-        var size = GADAdSizeFullWidthPortraitWithHeight(50) // set size to 50
-        banner = GADBannerView(adSize: size, origin: origin) // create the banner
-        banner.adUnitID = "ca-app-pub-2861384452756784/2814542027"
-        //banner.delegate = self
-        banner.rootViewController = self
-        self.view.addSubview(banner)
         
-        var request = GADRequest()
-        #if RELEASE
-        #else
-            request.testDevices = ["6f0316d55038e000e5b102394567d0a6"]
-        #endif
-        banner.loadRequest(request)
-
-        /*
-        let view = UIView()
-        view.frame = self.view.frame
-        view.backgroundColor = UIColor.whiteColor()
-        self.view.addSubview(view)
-        let interstitial = ADInterstitialAd()
-        interstitial.delegate = self
-        interstitial.presentInView(view)
-        println(interstitial.loaded)
-*/
+        activityIndicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyle.Gray
+        activityIndicator.frame = self.view.frame
+        activityIndicator.center = self.view.center
+        activityIndicator.hidesWhenStopped = true
+        self.view.addSubview(activityIndicator)
+        
     }
     
     func checkInAppPurchase() -> Bool {
@@ -120,52 +109,39 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBa
     
     func startInAppPurchase(notification: NSNotification) {
         println("startInAppPurchase")
+        var confirmationString = NSLocalizedString("Confirmation", comment: "")
+        var descriptionString = NSLocalizedString("Description", comment: "")
+        var yesString = NSLocalizedString("Yes", comment: "")
+        var restoreString = NSLocalizedString("Restore", comment: "")
+        var cancelString = NSLocalizedString("Cancel", comment: "")
         
-        let alert = UIAlertController(title: "Confirmation", message: "Have you ever purchased this?", preferredStyle: UIAlertControllerStyle.Alert)
-        alert.addAction(UIAlertAction(title: "Yes", style: UIAlertActionStyle.Default, handler: { action in
-            switch action.style{
-            case .Default:
-                println("default1")
-                
-                let set = NSSet(objects: adProductId)
-                let productsRequest = SKProductsRequest(productIdentifiers: set)
-                productsRequest.delegate = self
-                productsRequest.start()
-                self.isTapRestore = true
-            case .Cancel:
-                println("cancel1")
-                
-            case .Destructive:
-                println("destructive1")
-            }
-        }))
-        alert.addAction(UIAlertAction(title: "No", style: UIAlertActionStyle.Default, handler: { action in
-            switch action.style{
-            case .Default:
-                println("default2")
-                
-                let set = NSSet(objects: adProductId)
-                let productsRequest = SKProductsRequest(productIdentifiers: set)
-                productsRequest.delegate = self
-                productsRequest.start()
-                self.isTapRestore = false
-                
-            case .Cancel:
-                println("cancel2")
-                
-            case .Destructive:
-                println("destructive2")
-            }
-        }))
-        alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler: nil))
-        self.presentViewController(alert, animated: true, completion: nil)
+        let alert = UIAlertController(title: confirmationString, message: descriptionString, preferredStyle: UIAlertControllerStyle.Alert)
+        alert.addAction(UIAlertAction(title: yesString, style: UIAlertActionStyle.Default, handler: { action in
+            println("Yes")
+            self.activityIndicator.startAnimating()
+            let set = NSSet(objects: adProductId)
+            let productsRequest = SKProductsRequest(productIdentifiers: set)
+            productsRequest.delegate = self
+            productsRequest.start()
+            self.isTapRestore = false
 
+        }))
+        alert.addAction(UIAlertAction(title: restoreString, style: UIAlertActionStyle.Default, handler: { action in
+            println("Restore")
+            self.activityIndicator.startAnimating()
+            let set = NSSet(objects: adProductId)
+            let productsRequest = SKProductsRequest(productIdentifiers: set)
+            productsRequest.delegate = self
+            productsRequest.start()
+            self.isTapRestore = true
+            
+        }))
+        alert.addAction(UIAlertAction(title: cancelString, style: UIAlertActionStyle.Cancel, handler: {action in
+            println("cancel")
+            NSNotificationCenter.defaultCenter().postNotificationName("enableTouch", object: nil, userInfo: nil)
+        }))
+        self.presentViewController(alert, animated: true, completion: nil)
         
-        // check if products is in app store
-        let set = NSSet(objects: adProductId)
-        let productsRequest = SKProductsRequest(productIdentifiers: set)
-        productsRequest.delegate = self
-        productsRequest.start()
     }
     
     func productsRequest(request: SKProductsRequest!, didReceiveResponse response: SKProductsResponse!) {
@@ -174,36 +150,15 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBa
         if response.invalidProductIdentifiers.count > 0 {
             let alert = UIAlertView(title: "Error", message: "\(response.invalidProductIdentifiers[0]) is invalid", delegate: nil, cancelButtonTitle: "OK")
             alert.show()
-            return
         }
-        SKPaymentQueue.defaultQueue().addTransactionObserver(self)
-        
-        println("product request response.products")
-        for product in response.products {
-            println("product.title=\(product.localizedTitle)")
-            let payment = SKPayment(product: product as SKProduct)
-            SKPaymentQueue.defaultQueue().addPayment(payment)
-            println("payment Queue")
-        }
-        /*
         
         if isTapRestore {
             SKPaymentQueue.defaultQueue().addTransactionObserver(self)
             SKPaymentQueue.defaultQueue().restoreCompletedTransactions()
-            println("product request response.products")
-            /*
-            println("product request response.products")
-            for product in response.products {
-                println("product.title=\(product.localizedTitle)")
-                let payment = SKPayment(product: product as SKProduct)
-                SKPaymentQueue.defaultQueue().addPayment(payment)
-                println("payment Queue Restore")
-            }
-            */
+            println("add Restore Transaction")
         } else {
-            SKPaymentQueue.defaultQueue().addTransactionObserver(self)
-            
             println("product request response.products")
+            SKPaymentQueue.defaultQueue().addTransactionObserver(self)
             for product in response.products {
                 println("product.title=\(product.localizedTitle)")
                 let payment = SKPayment(product: product as SKProduct)
@@ -211,8 +166,7 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBa
                 println("payment Queue")
             }
         }
-        */
-
+        isTapRestore = false
     }
     
     
@@ -220,6 +174,7 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBa
         println("transactions count == \(transactions.count)")
         for transaction in transactions {
             println("transactionIdentifier = \(transaction.transactionIdentifier)")
+            
             if transaction.transactionState == SKPaymentTransactionState.Purchased {
                 println("purchased")
                 let userDefaults = NSUserDefaults.standardUserDefaults()
@@ -234,14 +189,11 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBa
                 queue.finishTransaction(transaction as SKPaymentTransaction)
             } else if transaction.transactionState == SKPaymentTransactionState.Restored {
                 println("restored")
-                
                 let userDefaults = NSUserDefaults.standardUserDefaults()
                 userDefaults.setBool(true, forKey: "isPurchased")
                 banner.removeFromSuperview()
                 NSNotificationCenter.defaultCenter().postNotificationName("purchased", object: nil, userInfo: nil)
                 queue.finishTransaction(transaction as SKPaymentTransaction)
-                isTapRestore = false
-
             } else {
                 println("else")
                 queue.finishTransaction(transaction as SKPaymentTransaction)
@@ -251,25 +203,28 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBa
     
     func paymentQueue(queue: SKPaymentQueue!, restoreCompletedTransactionsFailedWithError error: NSError!) {
         println("failed Restore")
+        
+        if activityIndicator.isAnimating() {
+            activityIndicator.stopAnimating()
+            NSNotificationCenter.defaultCenter().postNotificationName("enableTouch", object: nil, userInfo: nil)
+        }
     }
     
     func paymentQueueRestoreCompletedTransactionsFinished(queue: SKPaymentQueue!) {
         println("complete every Restore")
         
-        for transaction in queue.transactions {
-            // プロダクトIDが一致した場合
-            println("transaction.transactionIdentifier = \(transaction.transactionIdentifier)")
-            /*
-            if transaction.transactionIdentifier == adProductId {
-                println("Im hungry")
-                // *** ここに制限解除や広告削除などの課金後の命令を書く ***
-            }
-            */
+        if activityIndicator.isAnimating() {
+            activityIndicator.stopAnimating()
+            NSNotificationCenter.defaultCenter().postNotificationName("enableTouch", object: nil, userInfo: nil)
         }
     }
 
     func paymentQueue(queue: SKPaymentQueue!, removedTransactions transactions: [AnyObject]!) {
         println("removedTransactions")
+        if activityIndicator.isAnimating() {
+            activityIndicator.stopAnimating()
+            NSNotificationCenter.defaultCenter().postNotificationName("enableTouch", object: nil, userInfo: nil)
+        }
         SKPaymentQueue.defaultQueue().removeTransactionObserver(self)
     }
     
@@ -385,5 +340,36 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate, ADBa
     
     func gameCenterViewControllerDidFinish(gameCenterViewController: GKGameCenterViewController!){
         gameCenterViewController.dismissViewControllerAnimated(true, completion: nil);
+    }
+    
+    
+    func rate(notification: NSNotificationCenter){
+        
+        let userDefaults = NSUserDefaults.standardUserDefaults()
+        var disableRate: Bool = userDefaults.boolForKey("disableRate")
+        
+        if !disableRate {
+            var enjoyString = NSLocalizedString("Enjoy", comment: "")
+            var rateDescriptionString = NSLocalizedString("RateDescription", comment: "")
+            var rateString = NSLocalizedString("Rate", comment: "")
+            var laterString = NSLocalizedString("Later", comment: "")
+            var noThanksString = NSLocalizedString("NoThanks", comment: "")
+            let alert = UIAlertController(title: enjoyString, message: rateDescriptionString, preferredStyle: UIAlertControllerStyle.Alert)
+            alert.addAction(UIAlertAction(title: rateString, style: UIAlertActionStyle.Default, handler: { action in
+                println("Rate")
+                let url = "itms://itunes.apple.com/us/app/pen-dream/id951386660?mt=8"
+                UIApplication.sharedApplication().openURL(NSURL(string: url)!)
+            }))
+            alert.addAction(UIAlertAction(title: noThanksString, style: UIAlertActionStyle.Default, handler: { action in
+                println("NoThanks")
+                userDefaults.setBool(true, forKey: "disableRate")
+            }))
+            alert.addAction(UIAlertAction(title: laterString, style: UIAlertActionStyle.Cancel, handler: {action in
+                println("Later")
+                userDefaults.setBool(false, forKey: "disableRate")
+                
+            }))
+            self.presentViewController(alert, animated: true, completion: nil)
+        }
     }
 }

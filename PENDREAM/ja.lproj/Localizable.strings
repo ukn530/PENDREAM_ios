@@ -1,0 +1,19 @@
+/* 
+  Localizable.strings
+  PENDREAM
+
+  Created by ukn on 1/24/15.
+  Copyright (c) 2015 ukn. All rights reserved.
+*/
+
+"Confirmation" = "広告の削除";
+"Description" = "広告を削除できます。既に支払ったことのある方は、「購入を復元」を選択してください。";
+"Yes" = "広告を削除";
+"Restore" = "購入を復元";
+"Cancel" = "キャンセル";
+
+"Enjoy" = "(-o-)< エンジョイしてる？";
+"RateDescription" = "遊んでくれてありがとう! よかったらAppStoreで評価をつけてくれませんか?";
+"Rate" = "評価をする";
+"Later" = "後で";
+"NoThanks" = "しない";
